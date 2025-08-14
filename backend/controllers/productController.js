@@ -2,6 +2,7 @@
 import * as productService from "../services/productService.js";
 import fs from "fs";
 import logger from "../utils/logger.js";
+import path from 'path';
 
 
 
@@ -10,34 +11,23 @@ import logger from "../utils/logger.js";
 export const createProduct = async (req, res) => {
     try {
         logger.info("Ürün Oluşturma İşlemi");
-        const product = await productService.createProductService(req.user.role, req.body, req.files.image.tempFilePath);
-
-        fs.unlink(req.files.image.tempFilePath, (err) => {
-            if (err) {
-                console.error("Temp file silinemedi:", err);
-            } else {
-                console.log("Temp file başarıyla silindi");
-            }
-        });
-        res.status(201).json({
-            succeeded: true,
-            Product: product,
-            message: "Ürün Başarıyla Oluşturuldu",
-
-        });
-        console.log("Ürün oluşturuldu");
-        logger.info("Ürün Oluşturuldu");
-    } catch (error) {
-        if (req.files?.image?.tempFilePath) {
-            fs.unlink(req.files.image.tempFilePath, (err) => {
-                if (err) console.error("Hata temp file silinemedi:", err);
-            });
+        const files = Array.isArray(req.files) ? req.files : (req.file ? [req.file] : []);
+        const imagePaths = files.map(f => (f.filename ? `/uploads/${f.filename}` : f.path)).filter(Boolean);
+        const data = { ...req.body };
+        if (typeof data.tags === 'string') {
+            data.tags = data.tags.split(',').map(t => t.trim()).filter(Boolean);
         }
-        res.status(500).json({
-            succeeded: false,
-            message: error.message,
-        });
-        logger.error("Ürün Oluşturulurken Hata Oluştu:", error);
+        if (typeof data.specifications === 'string') {
+            try { data.specifications = JSON.parse(data.specifications); } catch (_) {}
+        }
+        if (typeof data.variants === 'string') {
+            try { data.variants = JSON.parse(data.variants); } catch (_) {}
+        }
+
+        const product = await productService.createProductService(req.user.role, data, imagePaths);
+        return res.status(201).json({ succeeded: true, product, message: 'Ürün Başarıyla Oluşturuldu' });
+    } catch (error) {
+        return res.status(500).json({ succeeded: false, message: error.message });
     }
 };
 

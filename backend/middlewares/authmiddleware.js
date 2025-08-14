@@ -57,7 +57,16 @@ const authenticateToken = async (req, res, next) => {
 
 
 
+// Admin rol kontrolü
+const requireAdmin = (req, res, next) => {
+  try {
+    if (!req.user || req.user.role !== 'admin') {
+      return res.status(403).send('Admin access required');
+    }
+    next();
+  } catch (e) {
+    return res.status(403).send('Admin access required');
+  }
+};
 
-
-
-export { authenticateToken, checkUser };
+export { authenticateToken, checkUser, requireAdmin };

@@ -5,7 +5,7 @@ import {
 
 
 // Kullanıcı adı veya mail değiştirme
-const changeNameandMail = async (req, res) => {
+export const changeNameandMail = async (req, res) => {
     try {
         const message = await changeNameandMailService(
             res.locals.user._id,
@@ -27,7 +27,7 @@ const changeNameandMail = async (req, res) => {
 };
 
 // Kullanıcı bilgilerini getirme
-const getAUser = async (req, res) => {
+export const getAUser = async (req, res) => {
     try {
         const user = await getUserByIdService(req.params.id);
 
@@ -52,4 +52,3 @@ const getAUser = async (req, res) => {
 
 
 
-export {  changeNameandMail, getAUser };

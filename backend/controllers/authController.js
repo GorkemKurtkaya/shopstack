@@ -14,7 +14,7 @@ import { validationResult } from 'express-validator';
 
 
 // Register İşlemi
-const registerUser = async (req, res) => {
+export const registerUser = async (req, res) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -36,7 +36,7 @@ const registerUser = async (req, res) => {
 };
 
 // Login İşlemi
-const loginUser = async (req, res) => {
+export const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
         const { user, token } = await loginUserService(email, password);
@@ -78,7 +78,7 @@ const loginUser = async (req, res) => {
 
 
 // Logout İşlemi
-const getLogout = (req, res) => {
+export const getLogout = (req, res) => {
     res.cookie("jwt", "", {
         maxAge: 0, 
         httpOnly: true, 
@@ -99,7 +99,7 @@ const getLogout = (req, res) => {
     logger.info("Logged out successfully");
 };
 
-export { registerUser, loginUser, getLogout };
+
 
 // Email doğrulama
 export const verifyEmail = async (req, res) => {

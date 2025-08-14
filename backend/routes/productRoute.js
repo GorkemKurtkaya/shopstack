@@ -1,25 +1,18 @@
 import express from 'express';
 import * as productController from '../controllers/productController.js';
-import * as authMiddleWare from '../middlewares/authmiddleware.js';
+import { authenticateToken } from '../middlewares/authmiddleware.js';
+import { requireAdmin } from '../middlewares/authmiddleware.js';
+import { upload } from '../utils/multer.js';
 
 const router = express.Router();
 
-// Ürün Oluşturma
-router.post('/',authMiddleWare.authenticateToken, productController.createProduct);
-
-// Ürün Güncelleme
-router.put('/:id',authMiddleWare.authenticateToken, productController.updateProduct);
-
-// Ürün Silme
-router.delete('/:id',authMiddleWare.authenticateToken, productController.deleteProduct);
-
-// Ürün Getirme
+// Ürünler
 router.get('/find/:id', productController.getAProduct);
-
-// Tüm Ürünleri Getirme
 router.get('/', productController.getAllProduct);
 
-
-
+// Admin ürün yönetimi
+router.post('/admin/products', authenticateToken, requireAdmin, upload.array('images', 6), productController.createProduct);
+router.put('/admin/products/:id', authenticateToken, requireAdmin, productController.updateProduct);
+router.delete('/admin/products/:id', authenticateToken, requireAdmin, productController.deleteProduct);
 
 export default router;
