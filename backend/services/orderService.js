@@ -1,50 +1,47 @@
 import Order from "../models/ordermodel.js";
-import * as kafka from "../utils/kafka.js";
 import Product from "../models/productmodel.js";
 
 
 // Sipariş oluşturma
-const createOrderService = async (orderData) => {
-    const { products } = orderData;
+export const createOrderService = async (orderData) => {
+    const { user, orderItems, shippingAddress, paymentInfo } = orderData;
+    if (!user || !Array.isArray(orderItems) || orderItems.length === 0) {
+        throw new Error('user ve orderItems zorunludur');
+    }
 
     let totalAmount = 0;
-
-    for (const item of products) {
-        const product = await Product.findById(item.productId);
-
-        if (!product) {
-            throw new Error(`Ürün bulunamadı: ${item.productId}`);
-        }
-
-        if (product.stock < item.quantity) {
-            throw new Error(`Üründe yeterli stok yok: ${product.name}`);
-        }
-
-        totalAmount += product.price * item.quantity;
+    for (const item of orderItems) {
+        const product = await Product.findById(item.product);
+        if (!product) throw new Error(`Ürün bulunamadı: ${item.product}`);
+        if (product.stock < item.quantity) throw new Error(`Üründe yeterli stok yok: ${product.name}`);
+        const unitPrice = item.price != null ? Number(item.price) : Number(product.price);
+        totalAmount += unitPrice * Number(item.quantity || 1);
     }
 
-    // Stokları Güncelleme
-    for (const item of products) {
-        await Product.findByIdAndUpdate(item.productId, {
-            $inc: { stock: -item.quantity },
-        });
+    // Stok güncelle
+    for (const item of orderItems) {
+        await Product.findByIdAndUpdate(item.product, { $inc: { stock: -Number(item.quantity || 1) } });
     }
 
-    orderData.amount = totalAmount;
+    const newOrder = await Order.create({
+        user,
+        orderItems: orderItems.map(i => ({
+            product: i.product,
+            quantity: Number(i.quantity || 1),
+            price: i.price != null ? Number(i.price) : undefined,
+            variant: i.variant
+        })),
+        shippingAddress,
+        paymentInfo,
+        totalAmount,
+        status: 'pending'
+    });
 
-    const newOrder = new Order(orderData);
-    await newOrder.save();
-
-    if (newOrder) {
-        kafka.sendMessage("order", `Yeni Sipariş Oluşturuldu: ${newOrder._id}`);
-        return newOrder; 
-    } else {
-        return false;
-    }
+    return newOrder;
 };
 
 // Sipariş güncelleme
-const updateOrderService = async (orderId, orderData) => {
+export const updateOrderService = async (orderId, orderData) => {
     return await Order.findByIdAndUpdate(
         orderId,
         { $set: orderData },
@@ -53,7 +50,7 @@ const updateOrderService = async (orderId, orderData) => {
 };
 
 // Sipariş durumunu güncelleme
-const updateOrderStatusService = async (orderId, status) => {
+export const updateOrderStatusService = async (orderId, status) => {
     return await Order.findByIdAndUpdate(
         orderId,
         { $set: { status } },
@@ -63,14 +60,14 @@ const updateOrderStatusService = async (orderId, status) => {
 
 
 // Sipariş silme
-const deleteOrderService = async (orderId) => {
+export const deleteOrderService = async (orderId) => {
     await Order.findByIdAndDelete(orderId);
     return "Sipariş silindi";
 };
 
 
 // Sipariş getirme
-const getOrderService = async (orderId) => {
+export const getOrderService = async (orderId) => {
     const order = await Order.findById(orderId);
     if (!order) throw new Error("Silinmiş veya hatalı sipariş id'si");
     return order;
@@ -78,19 +75,19 @@ const getOrderService = async (orderId) => {
 
 
 // Kullanıcıya ait siparişleri getirme
-const getUserOrdersService = async (userId) => {
-    return await Order.find({ userId });
+export const getUserOrdersService = async (userId) => {
+    return await Order.find({ user: userId });
 };
 
 
 // Tüm siparişleri getirme
-const getAllOrdersService = async () => {
+export const getAllOrdersService = async () => {
     return await Order.find();
 };
 
 
 // Sipariş gelirlerini getirme
-const getOrderIncomeService = async () => {
+export const getOrderIncomeService = async () => {
     const date = new Date();
     const lastMonth = new Date(date.setMonth(date.getMonth() - 1));
     const previousMonth = new Date(new Date().setMonth(lastMonth.getMonth() - 1));
@@ -112,14 +109,3 @@ const getOrderIncomeService = async () => {
     ]);
 };
 
-
-export {
-    createOrderService,
-    updateOrderService,
-    deleteOrderService,
-    getOrderService,
-    getUserOrdersService,
-    getAllOrdersService,
-    getOrderIncomeService,
-    updateOrderStatusService
-};

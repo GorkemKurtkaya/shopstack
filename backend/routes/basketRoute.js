@@ -1,19 +1,16 @@
 import express from "express";
 import basketController from "../controllers/basketController.js";
+import { authenticateToken } from "../middlewares/authmiddleware.js";
 
 
 
 const router = express.Router();
 
-
-// Sepete Ekleme
-router.post('/',basketController.addToBasket)
-// Sepeti Getirme
-router.get('/:userId',basketController.getBasket)
-// Sepeti Silme
-router.delete('/:userId',basketController.delete)
-// Sepet Ürün Güncelleme
-router.post('/update',basketController.updateCartItem)
+// Auth
+router.post('/add', authenticateToken, basketController.addToBasket)
+router.get('/me', authenticateToken, basketController.getMyBasket)
+router.delete('/me', authenticateToken, basketController.deleteMyBasket)
+router.post('/update', authenticateToken, basketController.updateCartItem)
 
 
 export default router;

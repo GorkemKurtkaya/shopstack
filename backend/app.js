@@ -9,6 +9,7 @@ import userRoute from "./routes/userRoute.js";
 import authRoute from "./routes/authRoute.js";
 import productRoute from "./routes/productRoute.js";
 import categoryRoute from "./routes/categoryRoute.js";
+import reviewRoute from "./routes/reviewRoute.js";
 import orderRoute from "./routes/orderRoute.js";
 import basketRoute from "./routes/basketRoute.js";
 import logger from "./utils/logger.js";
@@ -49,6 +50,7 @@ app.use("/auth", authRoute);
 app.use("/users", userRoute);
 app.use("/product", productRoute);
 app.use("/", categoryRoute);
+app.use("/reviews", reviewRoute);
 app.use("/orders", orderRoute);
 app.use("/basket", basketRoute);
 

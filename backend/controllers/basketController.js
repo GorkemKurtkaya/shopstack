@@ -1,15 +1,12 @@
 import * as basketService from "../services/basketService.js";
-import * as redis from "../utils/redis.js";
 import logger from "../utils/logger.js";
 
 const basketController = {
     // Sepete ürün ekleme
     addToBasket: async(req,res)=>{
         logger.info("Ürün Sepete Ekleme İşlemi");
-        const {userId,product} = req.body;
-        if(!userId){
-            return res.status(502).send({message:"userId is required"})
-        }
+        const userId = req.user?._id;
+        const {product} = req.body;
         if(!product.productId){
             return res.status(502).send({message:"productId is required"})
         }
@@ -32,13 +29,13 @@ const basketController = {
     },
 
 
-    // Sepet Listeleme
-    getBasket: async(req,res)=>{
+    // Sepet Listeleme (kendi sepeti)
+    getMyBasket: async(req,res)=>{
         try{
             logger.info("Sepet Listeleme İşlemi");
-            const response = await basketService.getBasket(req.params)
+            const response = await basketService.getBasket({ userId: req.user?._id })
 
-            if(response === null){
+            if(!response || response.length === 0){
                 return res.status(404).send({message:"Sepet bulunamadı"})
                 logger.error("Sepet Bulunamadı");
             }else{
@@ -52,12 +49,12 @@ const basketController = {
         
     },
 
-    // Sepet Silme
-    delete: async(req,res)=>{
-        const {userId} = req.params;
+    // Sepet Silme (kendi sepeti)
+    deleteMyBasket: async(req,res)=>{
+        const userId = req.user?._id;
         logger.info("Sepet Silme İşlemi");
         if(!userId){
-            return res.status(502).send({message:"userId is required"})
+            return res.status(401).send({message:"Unauthorized"})
         }
         try{
             const response = await basketService.removeCart({ userId }, res)
@@ -74,10 +71,11 @@ const basketController = {
 
     // Sepetteki ürünü güncelleme
     updateCartItem: async (req, res) => {
-        const { userId, productId, action } = req.body;
+        const userId = req.user?._id;
+        const { productId, action } = req.body;
 
         if (!userId) {
-            return res.status(400).send({ message: "userId is required" });
+            return res.status(401).send({ message: "Unauthorized" });
         }
         if (!productId) {
             return res.status(400).send({ message: "productId is required" });

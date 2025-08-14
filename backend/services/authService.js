@@ -29,7 +29,7 @@ const registerUserService = async (userData) => {
         favoriteCategories: userData.favoriteCategories,
         emailVerificationToken
     });
-    // send verification email
+    
     const verifyUrl = `${process.env.APP_URL || 'http://localhost:8000'}/auth/verify-email?token=${emailVerificationToken}`;
     await sendEmail({
         to: user.email,
@@ -51,9 +51,9 @@ const loginUserService = async (email, password) => {
     const same = await bcrypt.compare(password, user.password);
     if (!same) {
         throw new Error("Yanlış email veya şifre", password, user.password);
-        
+
     }
-    
+
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
     return { user, token };
@@ -83,7 +83,7 @@ export const forgotPasswordService = async (emailRaw) => {
     }
     const token = crypto.randomBytes(32).toString('hex');
     user.passwordResetToken = token;
-    user.passwordResetExpires = new Date(Date.now() + 1000 * 60 * 15); // 15 dk
+    user.passwordResetExpires = new Date(Date.now() + 1000 * 60 * 15);
     await user.save();
     const resetUrl = `${process.env.APP_URL || 'http://localhost:8000'}/auth/reset-password?token=${token}`;
     await sendEmail({
@@ -92,7 +92,6 @@ export const forgotPasswordService = async (emailRaw) => {
         text: `Şifrenizi sıfırlamak için bağlantı: ${resetUrl}`,
         html: `<p>Şifrenizi sıfırlamak için aşağıdaki bağlantıya tıklayın:</p><p><a href="${resetUrl}">${resetUrl}</a></p>`
     });
-    // Case study/dev: her zaman token ve resetUrl dön
     return { message: 'Mail gönderildi' };
 };
 
@@ -101,7 +100,7 @@ export const resetPasswordService = async (token, password) => {
     if (!token || !password) throw new Error('Token ve yeni şifre gerekli');
     const user = await User.findOne({ passwordResetToken: token, passwordResetExpires: { $gt: new Date() } });
     if (!user) throw new Error('Token geçersiz veya süresi dolmuş');
-    user.password = password; // pre-save hook hashleyecek
+    user.password = password;
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     await user.save();

@@ -174,3 +174,36 @@ export const updateAddress = async (req, res) => {
         return res.status(status).json({ succeeded: false, message });
     }
 };
+
+// Kullanıcı durumu kontrolü
+export const checkAuthStatus = async (req, res) => {
+    try {
+        if (res.locals.user) {
+            res.status(200).json({
+                succeeded: true,
+                authenticated: true,
+                user: {
+                    id: res.locals.user._id,
+                    firstName: res.locals.user.firstName,
+                    lastName: res.locals.user.lastName,
+                    email: res.locals.user.email,
+                    role: res.locals.user.role,
+                    emailVerified: res.locals.user.emailVerified
+                }
+            });
+        } else {
+            res.status(401).json({
+                succeeded: false,
+                authenticated: false,
+                message: "Unauthorized"
+            });
+        }
+    } catch (error) {
+        logger.error(`Auth check error: ${error.message}`);
+        res.status(500).json({
+            succeeded: false,
+            authenticated: false,
+            message: "Internal server error"
+        });
+    }
+};

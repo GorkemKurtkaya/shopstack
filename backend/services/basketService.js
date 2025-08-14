@@ -1,29 +1,19 @@
 
-import * as redis from "../utils/redis.js";
-import { createClient } from 'redis';
+import redisClient from "../utils/redis.js";
+
+
+const getCartKey = (userId) => `cart:${String(userId)}`;
 
 
 
-let redisClient;
-// Redis client oluşturma
-async function createRedisClient() {
-    if (!redisClient) {
-        redisClient = createClient({
-            url: process.env.REDIS_URL || 'redis://redis:6379'
-        });
 
-        redisClient.on('error', err => console.log('Redis Client Error', err));
-        await redisClient.connect();
-    }
-    return redisClient;
-}
 
 // Sepete ürün ekleme
 async function addToCart(params) {
     const { userId, product } = params;
-    const cartKey = userId;
+    const cartKey = getCartKey(userId);
     try {
-        const client = await createRedisClient();
+        const client = redisClient;
         
         
         const existingCartString = await client.get(cartKey);
@@ -60,13 +50,14 @@ async function addToCart(params) {
 
 // Sepeti getirme
 async function getBasket(params){
-    const client = await createRedisClient();
-        
-    const cartKey = params.userId;
+    const client = redisClient;
+    
+    const cartKey = getCartKey(params.userId);
 
     try{
 
         const value = await client.get(cartKey)
+        if (!value) return [];
         return JSON.parse(value)
     }catch(e){
         console.log(e);
@@ -76,9 +67,9 @@ async function getBasket(params){
 // Sepeti silme
 async function removeCart(params) {
     const { userId } = params; 
-    const cartKey = String(userId);  
+    const cartKey = getCartKey(userId);  
     try {
-        const client = await createRedisClient();
+        const client = redisClient;
         const result = await client.del(cartKey);
         return result === 0 
             ? { success: false, message: "Ürün bulunamadı" }
@@ -93,10 +84,10 @@ async function removeCart(params) {
 const updateCartItem = async (params,res) => {
     const { userId, productId, action } = params;
 
-    const cartKey = String(userId);
+    const cartKey = getCartKey(userId);
 
     try {
-        const client = await createRedisClient();
+        const client = redisClient;
 
         let cart = await client.get(cartKey);
 
@@ -152,4 +143,4 @@ const updateCartItem = async (params,res) => {
 
 
 
-export {addToCart,getBasket,removeCart,updateCartItem,createRedisClient}
+export {addToCart,getBasket,removeCart,updateCartItem}

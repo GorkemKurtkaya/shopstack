@@ -5,28 +5,18 @@ import logger from "../utils/logger.js";
 // Sipariş Oluşturma
 export const createOrder = async (req, res) => {
     logger.info("Sipariş Oluşturma İşlemi");
-    if (req.user.role !== "user" && req.user.role !== "admin") {
-        return res.status(403).json({ message: "Yetkisiz Kullanıcı / Lütfen Giriş Yapınız!" });
-    }
-    if (!req.body.products || req.body.products.length === 0) {
-        return res.status(400).json({ message: "Sepetiniz boş" });
-    }
-    if (!req.body.address) {
-        return res.status(400).json({ message: "Adres bilgileri eksik" });
-    }
-
+    // body -> orderItems, shippingAddress, paymentInfo
+    const payload = {
+        user: req.user._id,
+        orderItems: req.body.orderItems,
+        shippingAddress: req.body.shippingAddress,
+        paymentInfo: req.body.paymentInfo
+    };
     try {
-        logger.info("Sipariş Oluşturuluyor");
-        const savedOrder = await orderService.createOrderService(req.body);
-        res.status(200).json({ 
-            message: "Sipariş başarıyla oluşturuldu!",
-            order: savedOrder // Order objesini response'a ekledik
-        });
-        console.log("Sipariş Oluşturuldu:", savedOrder._id);
-        logger.info("Sipariş Oluşturuldu");
+        const savedOrder = await orderService.createOrderService(payload);
+        return res.status(200).json({ message: "Sipariş başarıyla oluşturuldu!", order: savedOrder });
     } catch (err) {
-        res.status(400).json({ message: err.message });
-        logger.error("Sipariş Oluşturulurken Hata Oluştu:", err);
+        return res.status(400).json({ message: err.message });
     }
 };
 
@@ -78,7 +68,8 @@ export const getOrder = async (req, res) => {
 export const getUserOrders = async (req, res) => {
     try {
         logger.info("Kullanıcı Siparişlerini Getirme İşlemi");
-        const orders = await orderService.getUserOrdersService(req.params.userId);
+        const userId = req.params.userId || (req.user && req.user._id);
+        const orders = await orderService.getUserOrdersService(userId);
         res.status(200).json(orders);
         logger.info("Kullanıcı Siparişleri Getirildi");
     } catch (err) {
@@ -90,9 +81,6 @@ export const getUserOrders = async (req, res) => {
 
 // Tüm Siparişleri Getirme
 export const getAllOrders = async (req, res) => {
-    if (req.user.role !== "admin") {
-        return res.status(403).json({ message: "Access denied" });
-    }
     try {
         logger.info("Tüm Siparişleri Getirme İşlemi");
         const orders = await orderService.getAllOrdersService();
@@ -107,9 +95,6 @@ export const getAllOrders = async (req, res) => {
 
 // Sipariş Gelirini Getirme
 export const getOrderIncome = async (req, res) => {
-    if (req.user.role !== "admin") {
-        return res.status(403).json({ message: "Access denied" });
-    }
     try {
         const income = await orderService.getOrderIncomeService();
         res.status(200).json(income);

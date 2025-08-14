@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.route('/:id').get(userController.getAUser);
 router.put("/changeNameandMail",authMiddleWare.authenticateToken,userController.changeNameandMail);
-// Me profile ve address işlemlerini authController üzerinden expose edeceğiz.
+
 
 
 
