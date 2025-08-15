@@ -3,7 +3,8 @@ import {
     getProductReviewsService,
     updateReviewService,
     deleteReviewService,
-    approveReviewService
+    approveReviewService,
+    getAllReviewsService
 } from "../services/reviewService.js";
 
 export const createReview = async (req, res) => {
@@ -25,6 +26,16 @@ export const getProductReviews = async (req, res) => {
         return res.status(400).json({ message: e.message });
     }
 };
+
+export const getAllReviews = async (req, res) => {
+    try {
+        const includeUnapproved = req.query.includeUnapproved !== 'false'; // Varsayılan olarak true
+        const reviews = await getAllReviewsService(includeUnapproved);
+        return res.status(200).json(reviews);
+    } catch (e) {
+        return res.status(400).json({ message: e.message });
+    }
+}
 
 export const updateReview = async (req, res) => {
     try {

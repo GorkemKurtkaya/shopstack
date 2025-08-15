@@ -1,13 +1,21 @@
 import express from "express";
-import * as userController from "../controllers/userController.js";
-import * as authMiddleWare from "../middlewares/authmiddleware.js";
-import { checkUser } from "../middlewares/authmiddleware.js";
+import {getAUser, changeNameandMail, updateUser, deleteUser, getUsers} from "../controllers/userController.js";
+import { authenticateToken, requireAdmin } from "../middlewares/authmiddleware.js";
 
 const router = express.Router();
 
 
-router.route('/:id').get(userController.getAUser);
-router.put("/changeNameandMail",authMiddleWare.authenticateToken,userController.changeNameandMail);
+router.get('/', authenticateToken, requireAdmin, getUsers);
+
+// Public
+router.route('/:id').get(getAUser);
+router.put("/changeNameandMail", authenticateToken, changeNameandMail);
+
+
+//Admin
+router.put('/:id', authenticateToken, requireAdmin, updateUser);
+router.delete('/:id', authenticateToken, requireAdmin, deleteUser);
+
 
 
 

@@ -1,28 +1,151 @@
 "use client";
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { Chart } from 'chart.js/auto';
-import { useFetch } from '@/hooks/useFetch';
+import { getAllOrders, getOrderIncome, Order } from '@/services/orders';
+import { getAllProducts, Product } from '@/services/product';
+
+// Güvenli tarih işleme fonksiyonu
+const isValidDate = (dateString: string): boolean => {
+  const date = new Date(dateString);
+  return date instanceof Date && !isNaN(date.getTime());
+};
+
+const formatDateForDisplay = (dateString: string): string => {
+  if (!isValidDate(dateString)) {
+    return 'Geçersiz Tarih';
+  }
+  try {
+    return new Date(dateString).toLocaleDateString('tr-TR');
+  } catch (error) {
+    return 'Geçersiz Tarih';
+  }
+};
 
 export default function DashboardPage() {
-  const { data, loading, error } = useFetch();
-  const { stats, monthlyData, popularProducts, recentOrders, activeUsers, activeUsersData } = data;
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [income, setIncome] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Dashboard verilerini yükle
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      const [ordersData, productsData, incomeData] = await Promise.all([
+        getAllOrders(),
+        getAllProducts(),
+        getOrderIncome()
+      ]);
+      
+      setOrders(ordersData);
+      setProducts(productsData.items || productsData);
+      setIncome(incomeData);
+    } catch (error) {
+      console.error('Dashboard veri yükleme hatası:', error);
+      setError('Veriler yüklenirken bir hata oluştu');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  // İstatistikler
+  const stats = {
+    totalRevenue: orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0),
+    totalOrders: orders.length,
+    activeOrders: orders.filter(order => 
+      order.status === 'pending' || 
+      order.status === 'processing' || 
+      order.status === 'shipped'
+    ).length
+  };
+
+  // Günlük gelir verisi (son 7 gün)
+  const getDailyRevenue = () => {
+    const last7Days = Array.from({ length: 7 }, (_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      return date.toISOString().split('T')[0];
+    }).reverse();
+
+    return last7Days.map(date => {
+      const dayOrders = orders.filter(order => 
+        order.createdAt.startsWith(date)
+      );
+      const amount = dayOrders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+      return { day: date, amount };
+    });
+  };
+
+  // Popüler ürünler (en çok sipariş edilen)
+  const getPopularProducts = () => {
+    const productOrderCount: { [key: string]: number } = {};
+    
+    orders.forEach(order => {
+      order.orderItems.forEach(item => {
+        const productId = item.product;
+        productOrderCount[productId] = (productOrderCount[productId] || 0) + item.quantity;
+      });
+    });
+
+    return Object.entries(productOrderCount)
+      .map(([productId, quantity]) => {
+        const product = products.find(p => p._id === productId);
+        return {
+          id: productId,
+          name: product?.name || 'Bilinmeyen Ürün',
+          quantity
+        };
+      })
+      .sort((a, b) => b.quantity - a.quantity)
+      .slice(0, 5);
+  };
+
+  // Son siparişler
+  const getRecentOrders = () => {
+    return orders
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 10)
+      .map(order => ({
+        id: order._id,
+        customer_name: `Kullanıcı ${order.user.slice(-8)}`,
+        total: order.totalAmount || 0,
+        status: order.status,
+        created_at: order.createdAt
+      }));
+  };
 
   useEffect(() => {
     let barChart: Chart | null = null;
     let doughnutChart: Chart | null = null;
-    let activeUsersChart: Chart | null = null;
 
-    if (monthlyData.length > 0 && popularProducts.length > 0) {
+    if (orders.length > 0 && products.length > 0) {
+      const dailyRevenue = getDailyRevenue();
+      const popularProducts = getPopularProducts();
+
       const barCtx = document.getElementById('barChart') as HTMLCanvasElement;
       if (barCtx) {
         barChart = new Chart(barCtx, {
           type: 'bar',
           data: {
-            labels: monthlyData.map(data => new Date(data.day).toLocaleDateString('tr-TR')),
+            labels: dailyRevenue.map(data => {
+              try {
+                return new Date(data.day).toLocaleDateString('tr-TR', { 
+                  month: 'short', 
+                  day: 'numeric' 
+                });
+              } catch (error) {
+                return 'Geçersiz Tarih';
+              }
+            }),
             datasets: [{
               label: 'Günlük Gelir',
-              data: monthlyData.map(data => data.amount),
+              data: dailyRevenue.map(data => data.amount),
               backgroundColor: '#6366F1',
               borderColor: '#6366F1',
               borderWidth: 1,
@@ -92,48 +215,6 @@ export default function DashboardPage() {
           }
         });
       }
-
-      const activeUsersCtx = document.getElementById('activeUsersChart') as HTMLCanvasElement;
-      if (activeUsersCtx) {
-        activeUsersChart = new Chart(activeUsersCtx, {
-          type: 'line',
-          data: {
-            labels: Array(24).fill(0).map((_, i) => `${i}:00`),
-            datasets: [{
-              label: 'Aktif Kullanıcılar',
-              data: activeUsersData,
-              borderColor: '#6366F1',
-              backgroundColor: 'rgba(99, 102, 241, 0.1)',
-              tension: 0.4,
-              fill: true,
-              pointRadius: 0
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              y: {
-                beginAtZero: true,
-                grid: {
-                  display: true,
-                  color: 'rgba(0, 0, 0, 0.1)'
-                }
-              },
-              x: {
-                grid: {
-                  display: false
-                }
-              }
-            },
-            plugins: {
-              legend: {
-                display: false
-              }
-            }
-          }
-        });
-      }
     }
 
     return () => {
@@ -143,37 +224,42 @@ export default function DashboardPage() {
       if (doughnutChart) {
         doughnutChart.destroy();
       }
-      if (activeUsersChart) {
-        activeUsersChart.destroy();
-      }
     };
-  }, [monthlyData, popularProducts, activeUsersData]);
+  }, [orders, products]);
 
   const getStatusText = (status: string): string => {
     switch (status) {
       case 'pending':
-        return 'Sipariş Alındı';
-      case 'preparing':
-        return 'Sipariş Hazırlanıyor';
-      case 'on_delivery':
-        return 'Sipariş Yola Çıktı';
-      case 'completed':
-        return 'Sipariş Tamamlandı';
+        return 'Ödeme Bekliyor';
+      case 'processing':
+        return 'İşleniyor';
+      case 'shipped':
+        return 'Kargoda';
+      case 'delivered':
+        return 'Teslim Edildi';
+      case 'cancelled':
+        return 'İptal Edildi';
+      case 'refunded':
+        return 'İade Edildi';
       default:
-        return 'Sipariş Alındı';
+        return 'Beklemede';
     }
   };
 
   const getStatusColor = (status: string): string => {
     switch (status) {
       case 'pending':
-        return 'bg-blue-100 text-blue-800';
-      case 'preparing':
         return 'bg-yellow-100 text-yellow-800';
-      case 'on_delivery':
+      case 'processing':
+        return 'bg-blue-100 text-blue-800';
+      case 'shipped':
         return 'bg-purple-100 text-purple-800';
-      case 'completed':
+      case 'delivered':
         return 'bg-green-100 text-green-800';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800';
+      case 'refunded':
+        return 'bg-gray-100 text-gray-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -194,6 +280,8 @@ export default function DashboardPage() {
       </div>
     );
   }
+
+  const recentOrders = getRecentOrders();
 
   return (
     <div className="space-y-6 mt-10">
@@ -220,23 +308,6 @@ export default function DashboardPage() {
         <div className="bg-white rounded-lg shadow-md p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-500 uppercase">Toplam Kullanıcı</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.totalUsers}</p>
-              <span className="inline-block px-2 py-1 mt-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">
-                +2.6%
-              </span>
-            </div>
-            <div className="p-3 rounded-full bg-gray-100">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-md p-4">
-          <div className="flex items-center justify-between">
-            <div>
               <p className="text-sm font-medium text-gray-500 uppercase">Toplam Sipariş</p>
               <p className="text-2xl font-bold text-gray-900">{stats.totalOrders}</p>
               <span className="inline-block px-2 py-1 mt-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">
@@ -246,6 +317,23 @@ export default function DashboardPage() {
             <div className="p-3 rounded-full bg-gray-100">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-md p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-500 uppercase">Toplam Ürün</p>
+              <p className="text-2xl font-bold text-gray-900">{products.length}</p>
+              <span className="inline-block px-2 py-1 mt-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">
+                +2.8%
+              </span>
+            </div>
+            <div className="p-3 rounded-full bg-gray-100">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
               </svg>
             </div>
           </div>
@@ -279,8 +367,8 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 p-4 space-y-8 lg:gap-8 lg:space-y-0 lg:grid-cols-3">
-        <div className="col-span-2 bg-white rounded-md shadow-lg">
+      <div className="grid grid-cols-1 p-4 space-y-8 lg:gap-8 lg:space-y-0 lg:grid-cols-2">
+        <div className="bg-white rounded-md shadow-lg">
           <div className="flex items-center justify-between p-4 border-b">
             <h4 className="text-lg font-semibold text-gray-500">Günlük Gelir Grafiği</h4>
           </div>
@@ -325,7 +413,7 @@ export default function DashboardPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(order.created_at).toLocaleDateString('tr-TR')}
+                      {formatDateForDisplay(order.created_at)}
                     </td>
                   </tr>
                 ))}

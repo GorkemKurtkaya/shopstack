@@ -69,3 +69,13 @@ export const approveReviewService = async (reviewId, approved) => {
     return review;
 };
 
+
+export const getAllReviewsService = async (includeUnapproved = false) => {
+    const filter = {};
+    if (!includeUnapproved) filter.approved = true;
+    return Review.find(filter)
+        .populate("user", "firstName lastName")
+        .populate("product", "name slug")
+        .sort({ createdAt: -1 });
+}
+

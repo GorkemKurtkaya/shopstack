@@ -32,9 +32,20 @@ interface DashboardData {
   monthlyData: MonthlyData[];
   popularProducts: PopularProduct[];
   recentOrders: RecentOrder[];
-  activeUsers: number;
-  activeUsersData: number[];
 }
+
+const isValidDate = (dateString: string): boolean => {
+  const date = new Date(dateString);
+  return date instanceof Date && !isNaN(date.getTime());
+};
+
+const formatDate = (dateString: string): string => {
+  if (!isValidDate(dateString)) {
+    return new Date().toISOString().split('T')[0];
+  }
+  const date = new Date(dateString);
+  return date.toISOString().split('T')[0];
+};
 
 export function useFetch() {
   const [data, setData] = useState<DashboardData>({
@@ -46,9 +57,7 @@ export function useFetch() {
     },
     monthlyData: [],
     popularProducts: [],
-    recentOrders: [],
-    activeUsers: 0,
-    activeUsersData: []
+    recentOrders: []
   });
 
   const [loading, setLoading] = useState(true);
@@ -68,48 +77,24 @@ export function useFetch() {
       }
       const ordersData = await ordersResponse.json();
 
-      // Kullanıcıları al
-      const usersResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user`, {
-        credentials: 'include'
-      });
-      if (!usersResponse.ok) {
-        throw new Error('Kullanıcılar yüklenirken bir hata oluştu');
-      }
-      const usersData = await usersResponse.json();
-
-      const now = new Date();
-      const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
-
-      const activeUsersCount = usersData.filter((user: any) => {
-        const lastActivity = new Date(user.last_activity || 0);
-        return lastActivity > fiveMinutesAgo;
-      }).length;
-
-
-      const hourlyData = Array(24).fill(0);
-      usersData.forEach((user: any) => {
-        if (user.last_activity) {
-          const activityTime = new Date(user.last_activity);
-          const hour = activityTime.getHours();
-          hourlyData[hour]++;
-        }
-      });
-
       // İstatistikleri hesapla
       const totalOrders = ordersData.length;
-      const totalRevenue = ordersData.reduce((sum: number, order: any) => sum + order.amount, 0);
-      const activeOrders = ordersData.filter((order: any) => order.status !== 'completed').length;
-      const totalUsers = usersData.length;
+      const totalRevenue = ordersData.reduce((sum: number, order: any) => sum + (order.paymentInfo?.totalAmount || 0), 0);
+      const activeOrders = ordersData.filter((order: any) => order.paymentInfo?.status !== 'completed').length;
+      
+      // Kullanıcı sayısını şimdilik 0 olarak ayarla (API hazır olmadığı için)
+      const totalUsers = 0;
 
-      // Aylık verileri hesapla
+      // Aylık verileri hesapla (güvenli tarih işleme ile)
       const dailyStats: { [key: string]: number } = {};
       ordersData.forEach((order: any) => {
-        const date = new Date(order.created_at);
-        const day = date.toISOString().split('T')[0];
-        if (!dailyStats[day]) {
-          dailyStats[day] = 0;
+        if (order.createdAt) {
+          const day = formatDate(order.createdAt);
+          if (!dailyStats[day]) {
+            dailyStats[day] = 0;
+          }
+          dailyStats[day] += order.paymentInfo?.totalAmount || 0;
         }
-        dailyStats[day] += order.amount;
       });
 
       const dailyDataArray = Object.entries(dailyStats)
@@ -117,57 +102,67 @@ export function useFetch() {
           day,
           amount
         }))
-        .sort((a, b) => new Date(a.day).getTime() - new Date(b.day).getTime());
+        .sort((a, b) => {
+          const dateA = new Date(a.day);
+          const dateB = new Date(b.day);
+          return dateA.getTime() - dateB.getTime();
+        });
 
-      // Popüler ürünleri hesapla
+      // Popüler ürünleri hesapla (orderItems'dan)
       const productStats: { [key: string]: number } = {};
       ordersData.forEach((order: any) => {
-        if (order.products && Array.isArray(order.products)) {
-          order.products.forEach((product: any) => {
-            if (!productStats[product.product_id]) {
-              productStats[product.product_id] = 0;
+        if (order.orderItems && Array.isArray(order.orderItems)) {
+          order.orderItems.forEach((item: any) => {
+            if (item.product && item.quantity) {
+              if (!productStats[item.product]) {
+                productStats[item.product] = 0;
+              }
+              productStats[item.product] += item.quantity || 0;
             }
-            productStats[product.product_id] += product.quantity;
           });
         }
       });
 
-      // Ürün detaylarını al
+      // Ürün detaylarını al (product/find endpoint'inden)
       const productDetails: { [key: string]: any } = {};
       for (const productId of Object.keys(productStats)) {
-        const productResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/${productId}`, {
-          credentials: 'include'
-        });
-        if (productResponse.ok) {
-          const productData = await productResponse.json();
-          productDetails[productId] = productData;
+        try {
+          const productResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/product/find/${productId}`, {
+            credentials: 'include'
+          });
+          if (productResponse.ok) {
+            const productData = await productResponse.json();
+            productDetails[productId] = productData;
+          }
+        } catch (error) {
+          console.warn(`Ürün ${productId} detayları alınamadı:`, error);
         }
       }
 
       const popularProductsArray = Object.entries(productStats)
         .map(([productId, quantity]) => ({
-          name: productDetails[productId]?.title || `Ürün ${productId}`,
+          name: productDetails[productId]?.name || `Ürün ${productId}`,
           quantity
         }))
         .sort((a, b) => b.quantity - a.quantity)
         .slice(0, 5);
 
-      // Son siparişleri hazırla
-      const ordersWithUsers = await Promise.all(
-        ordersData
-          .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-          .slice(0, 5)
-          .map(async (order: any) => {
-            const user = usersData.find((u: any) => u.id === order.user_id);
-            return {
-              id: order.id,
-              customer_name: user ? user.name : 'Bilinmeyen Kullanıcı',
-              total: order.amount,
-              status: order.status,
-              created_at: order.created_at
-            };
-          })
-      );
+      // Son siparişleri hazırla (güvenli tarih işleme ile)
+      const recentOrdersArray = ordersData
+        .filter((order: any) => order.createdAt && isValidDate(order.createdAt))
+        .sort((a: any, b: any) => {
+          const dateA = new Date(a.createdAt);
+          const dateB = new Date(b.createdAt);
+          return dateB.getTime() - dateA.getTime();
+        })
+        .slice(0, 5)
+        .map((order: any) => ({
+          id: order._id,
+          customer_name: `Müşteri #${order._id.slice(0, 6)}`,
+          total: order.paymentInfo?.totalAmount || 0,
+          status: order.paymentInfo?.status || 'pending',
+          created_at: order.createdAt
+        }));
 
       // Tüm verileri set et
       setData({
@@ -179,9 +174,7 @@ export function useFetch() {
         },
         monthlyData: dailyDataArray,
         popularProducts: popularProductsArray,
-        recentOrders: ordersWithUsers,
-        activeUsers: activeUsersCount,
-        activeUsersData: hourlyData
+        recentOrders: recentOrdersArray
       });
 
     } catch (err: any) {
@@ -194,6 +187,7 @@ export function useFetch() {
   useEffect(() => {
     fetchDashboardData();
 
+    // 30 saniyede bir verileri güncelle
     const interval = setInterval(fetchDashboardData, 3000000);
 
     return () => {

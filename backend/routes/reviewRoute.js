@@ -1,5 +1,5 @@
 import express from 'express';
-import { createReview, getProductReviews, updateReview, deleteReview, approveReview } from '../controllers/reviewController.js';
+import { createReview, getProductReviews, updateReview, deleteReview, approveReview,getAllReviews } from '../controllers/reviewController.js';
 import { authenticateToken, requireAdmin } from '../middlewares/authmiddleware.js';
 import {
   validateCreateReview,
@@ -11,6 +11,9 @@ import {
 } from '../middlewares/validations/reviewvalidationMiddleware.js';
 
 const router = express.Router();
+
+// Admin 
+router.get('/all', authenticateToken, requireAdmin, getAllReviews); 
 
 // Public
 router.get('/:productId', validateProductId, getProductReviews);

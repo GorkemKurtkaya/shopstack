@@ -1,10 +1,13 @@
 import {
     changeNameandMailService,
     getUserByIdService,
+    updateUserinfo,
+    deleteUserById,
+    getAllUsers
 } from "../services/userService.js";
 
 
-// Kullanıcı adı veya mail değiştirme
+
 export const changeNameandMail = async (req, res) => {
     try {
         const message = await changeNameandMailService(
@@ -26,7 +29,7 @@ export const changeNameandMail = async (req, res) => {
     }
 };
 
-// Kullanıcı bilgilerini getirme
+
 export const getAUser = async (req, res) => {
     try {
         const user = await getUserByIdService(req.params.id);
@@ -50,5 +53,41 @@ export const getAUser = async (req, res) => {
     }
 };
 
+export const updateUser = async (req, res) => {
+    try {
+        console.log("Kullanıcı Güncelleme İşlemi Başladı");
+        const { name, email, role } = req.body;
+        const user = await updateUserinfo(req.params.id, name, email, role);
+        const updatedUser = await getUserByIdService(req.params.id); // getUserById yerine getUserByIdService
+        console.log("Kullanıcı Başarıyla Güncellendi");
+        res.status(200).json({ message: "User updated", updatedUser });
+    } catch (error) {
+        console.error("Kullanıcı Güncellenirken Hata:", error);
+        res.status(400).json({ error: error.message });
+    }
+};
+
+export const deleteUser = async (req, res) => {
+  try {
+    console.log("Kullanıcı Silme İşlemi Başladı");
+    const deletedUser = await deleteUserById(req.params.id);
+    console.log("Kullanıcı Başarıyla Silindi");
+    res.json({ message: "Kullanıcı başarıyla silindi", deletedUser });
+  } catch (error) {
+    console.error("Kullanıcı Silinirken Hata:", error);
+    res.status(400).json({ error: error.message });
+  }
+};
 
 
+export const getUsers = async (req, res) => {
+    try {
+        console.log("Tüm Kullanıcıları Getirme İşlemi Başladı");
+        const users = await getAllUsers();
+        console.log("Tüm Kullanıcılar Başarıyla Getirildi");
+        res.json(users);
+      } catch (error) {
+        console.error("Kullanıcıları Getirirken Hata:", error);
+        res.status(400).json({ error: error.message });
+      }
+}
