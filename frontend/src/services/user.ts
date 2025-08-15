@@ -5,6 +5,7 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
+  password: string;
   role: 'admin' | 'customer' | 'moderator';
   phoneNumber: string;
   addresses: Array<{
@@ -78,52 +79,10 @@ export const getUserById = async (userId: string): Promise<User> => {
   }
 };
 
-// Mevcut kullanıcı bilgilerini getir
-export const getCurrentUser = async (): Promise<User> => {
-  try {
-    const response = await fetch(`${BASE_URL}/auth/me`, {
-      credentials: 'include'
-    });
-    
-    if (!response.ok) {
-      throw new Error('Kullanıcı bilgileri yüklenirken bir hata oluştu');
-    }
-    
-    return await response.json();
-  } catch (error) {
-    console.error('Kullanıcı bilgileri getirme hatası:', error);
-    throw error;
-  }
-};
-
-// Yeni kullanıcı oluştur (admin için)
-export const createUser = async (userData: CreateUserData): Promise<User> => {
-  try {
-    const response = await fetch(`${BASE_URL}/admin/users`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify(userData)
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Kullanıcı oluşturulurken bir hata oluştu');
-    }
-    
-    return await response.json();
-  } catch (error) {
-    console.error('Kullanıcı oluşturma hatası:', error);
-    throw error;
-  }
-};
-
-// Kullanıcı güncelle (admin için)
+// Kullanıcı güncelle
 export const updateUser = async (userId: string, userData: UpdateUserData): Promise<User> => {
   try {
-    const response = await fetch(`${BASE_URL}/admin/users/${userId}`, {
+    const response = await fetch(`${BASE_URL}/users/${userId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -144,10 +103,10 @@ export const updateUser = async (userId: string, userData: UpdateUserData): Prom
   }
 };
 
-// Kullanıcı sil (admin için)
+// Kullanıcı sil
 export const deleteUser = async (userId: string): Promise<void> => {
   try {
-    const response = await fetch(`${BASE_URL}/admin/users/${userId}`, {
+    const response = await fetch(`${BASE_URL}/users/${userId}`, {
       method: 'DELETE',
       credentials: 'include'
     });
@@ -158,54 +117,6 @@ export const deleteUser = async (userId: string): Promise<void> => {
     }
   } catch (error) {
     console.error('Kullanıcı silme hatası:', error);
-    throw error;
-  }
-};
-
-// Kullanıcı rolünü güncelle (admin için)
-export const updateUserRole = async (userId: string, role: 'admin' | 'customer' | 'moderator'): Promise<User> => {
-  try {
-    const response = await fetch(`${BASE_URL}/admin/users/${userId}/role`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify({ role })
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Kullanıcı rolü güncellenirken bir hata oluştu');
-    }
-    
-    return await response.json();
-  } catch (error) {
-    console.error('Kullanıcı rolü güncelleme hatası:', error);
-    throw error;
-  }
-};
-
-// Kullanıcı email doğrulama durumunu güncelle (admin için)
-export const updateUserEmailVerification = async (userId: string, emailVerified: boolean): Promise<User> => {
-  try {
-    const response = await fetch(`${BASE_URL}/admin/users/${userId}/email-verification`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify({ emailVerified })
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Email doğrulama durumu güncellenirken bir hata oluştu');
-    }
-    
-    return await response.json();
-  } catch (error) {
-    console.error('Email doğrulama durumu güncelleme hatası:', error);
     throw error;
   }
 };

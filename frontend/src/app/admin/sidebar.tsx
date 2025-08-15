@@ -11,7 +11,9 @@ import {
     IconHome,
     IconX,
     IconLogout,
-    IconTopologyStar,
+    IconPackage,
+    IconCategory,
+    IconMessageCircle,
     IconChevronDown
 } from '@tabler/icons-react';
 
@@ -60,7 +62,7 @@ const Sidebar = memo(({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
         {
             name: 'Ürünler',
             path: '/admin/products',
-            icon: <IconTopologyStar className="w-6 h-6" />
+            icon: <IconPackage className="w-6 h-6" />
         },
         {
             name: 'Siparişler',
@@ -70,12 +72,12 @@ const Sidebar = memo(({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
         {
             name: "Kategoriler",
             path: "/admin/categories",
-            icon: <IconFileDescription className="w-6 h-6" />
+            icon: <IconCategory className="w-6 h-6" />
         },
         {
             name: "Yorumlar",
             path: "/admin/reviews",
-            icon: <IconFileDescription className="w-6 h-6" />
+            icon: <IconMessageCircle className="w-6 h-6" />
         },
         {
             name: 'Kullanıcılar',
