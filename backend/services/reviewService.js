@@ -79,3 +79,15 @@ export const getAllReviewsService = async (includeUnapproved = false) => {
         .sort({ createdAt: -1 });
 }
 
+// Kullanıcının belirli bir ürün için yorum yapıp yapmadığını kontrol et
+export const checkUserReviewService = async (userId, productId) => {
+    const review = await Review.findOne({ 
+        user: userId, 
+        product: productId 
+    }).populate("user", "firstName lastName");
+    
+    return review;
+}
+
+
+

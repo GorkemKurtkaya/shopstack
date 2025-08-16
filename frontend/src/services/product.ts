@@ -28,7 +28,14 @@ export interface Product {
   name: string;
   description: string;
   images: string[];
-  category: string;
+  category: string | {
+    _id: string;
+    name: string;
+    slug: string;
+    active: boolean;
+    createdAt: string;
+    updatedAt: string;
+  };
   price: number;
   stock: number;
   specifications: Record<string, any>;
@@ -72,6 +79,24 @@ export interface PaginatedProductsResponse {
   limit: number;
   pages: number;
 }
+
+// Öne çıkan ürünleri getir
+export const getFeaturedProducts = async (): Promise<Product[]> => {
+  try {
+    const response = await fetch(`${BASE_URL}/product/featured`, {
+      credentials: 'include'
+    });
+    
+    if (!response.ok) {
+      throw new Error('Öne çıkan ürünler yüklenirken bir hata oluştu');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Featured products getirme hatası:', error);
+    throw error;
+  }
+};
 
 // Tüm ürünleri getir
 export const getAllProducts = async (): Promise<PaginatedProductsResponse> => {

@@ -153,6 +153,11 @@ export const getMe = async (req, res) => {
 // Me profil güncelleme
 export const updateProfile = async (req, res) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ succeeded: false, errors: errors.array() });
+        }
+        
         const result = await updateProfileService(req.user._id, req.body);
         return res.status(200).json({ succeeded: true, ...result });
     } catch (error) {
@@ -165,13 +170,18 @@ export const updateProfile = async (req, res) => {
 // Me adres güncelleme
 export const updateAddress = async (req, res) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ succeeded: false, errors: errors.array() });
+        }
+        
         const { addresses } = req.body;
         const result = await updateAddressService(req.user._id, addresses);
         return res.status(200).json({ succeeded: true, ...result });
     } catch (error) {
         const message = error.message || 'Beklenmeyen hata';
         const status = message.toLowerCase().includes('array') ? 400 : (message.toLowerCase().includes('not found') ? 404 : 500);
-        return res.status(status).json({ succeeded: false, message });
+        return res.status(500).json({ succeeded: false, message });
     }
 };
 

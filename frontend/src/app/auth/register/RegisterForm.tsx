@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
 import { 
@@ -14,6 +14,7 @@ import {
   IconHeart,
   IconCheck
 } from '@tabler/icons-react';
+import { getActiveCategories, Category } from '@/services/category';
 
 interface FormData {
   firstName: string;
@@ -30,12 +31,9 @@ interface FormData {
   favoriteCategories: string[];
 }
 
-const categories = [
-  'electronics', 'books', 'clothing', 'home', 'sports', 
-  'beauty', 'automotive', 'toys', 'food', 'health'
-];
-
 export default function RegisterForm() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
     lastName: '',
@@ -57,6 +55,22 @@ export default function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false);
   
   const { register } = useAuth();
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setCategoriesLoading(true);
+        const categoriesData = await getActiveCategories();
+        setCategories(categoriesData);
+      } catch (error) {
+        console.error('Kategoriler yüklenirken hata:', error);
+      } finally {
+        setCategoriesLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleInputChange = (field: keyof FormData, value: string | string[]) => {
     setFormData(prev => ({
@@ -372,36 +386,33 @@ export default function RegisterForm() {
                 <IconHeart className="h-5 w-5 mr-2 text-green-500" />
                 Favori Kategoriler
               </h3>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                {categories.map((category) => (
-                  <button
-                    key={category}
-                    type="button"
-                    onClick={() => handleCategoryToggle(category)}
-                    className={`p-3 rounded-xl border-2 transition-all duration-200 flex items-center justify-center ${
-                      formData.favoriteCategories.includes(category)
-                        ? 'border-green-500 bg-green-50 text-green-700'
-                        : 'border-gray-300 bg-white text-gray-600 hover:border-green-300 hover:bg-green-50'
-                    }`}
-                  >
-                    {formData.favoriteCategories.includes(category) && (
-                      <IconCheck className="h-4 w-4 mr-2" />
-                    )}
-                    <span className="text-sm font-medium capitalize">
-                      {category === 'electronics' ? 'Elektronik' :
-                       category === 'books' ? 'Kitaplar' :
-                       category === 'clothing' ? 'Giyim' :
-                       category === 'home' ? 'Ev' :
-                       category === 'sports' ? 'Spor' :
-                       category === 'beauty' ? 'Güzellik' :
-                       category === 'automotive' ? 'Otomotiv' :
-                       category === 'toys' ? 'Oyuncak' :
-                       category === 'food' ? 'Gıda' :
-                       category === 'health' ? 'Sağlık' : category}
-                    </span>
-                  </button>
-                ))}
-              </div>
+              {categoriesLoading ? (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                  {categories.map((category) => (
+                    <button
+                      key={category._id}
+                      type="button"
+                      onClick={() => handleCategoryToggle(category.name)}
+                      className={`p-3 rounded-xl border-2 transition-all duration-200 flex items-center justify-center ${
+                        formData.favoriteCategories.includes(category.name)
+                          ? 'border-green-500 bg-green-50 text-green-700'
+                          : 'border-gray-300 bg-white text-gray-600 hover:border-green-300 hover:bg-green-50'
+                      }`}
+                    >
+                      {formData.favoriteCategories.includes(category.name) && (
+                        <IconCheck className="h-4 w-4 mr-2" />
+                      )}
+                      <span className="text-sm font-medium">
+                        {category.name}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Error Message */}

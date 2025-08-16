@@ -114,3 +114,18 @@ export const getAllProduct = async (req, res) => {
 };
 
 
+
+export const getFeaturedProducts = async (req, res) => {
+    try {
+        logger.info("Öne Çıkan Ürünleri Getirme İşlemi");
+        const products = await productService.getFeaturedProductsService();
+        res.status(200).json(products);
+        console.log("Öne çıkan ürünler getirildi");
+    } catch (error) {
+        res.status(500).json({
+            succeeded: false,
+            message: error.message,
+        });
+        logger.error("Öne Çıkan Ürünler Getirilirken Hata Oluştu:", error);
+    }
+}

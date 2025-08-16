@@ -108,3 +108,13 @@ export const getAllProductsService = async (query) => {
         pages: Math.ceil(total / Number(limit))
     };
 };
+
+
+export const getFeaturedProductsService = async (limit = 10) => {
+    const products = await Product.find({ featured: true })
+        .sort({ createdAt: -1 })
+        .limit(Number(limit))
+        .populate('category');
+    
+    return products;
+}

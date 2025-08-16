@@ -86,7 +86,7 @@ const Sidebar = memo(({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
         },
         {
             name: "Ana Sayfa",
-            path: "/shop",
+            path: "/",
             icon: <IconHome className="w-6 h-6" />
         }
     ];

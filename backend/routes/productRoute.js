@@ -15,6 +15,7 @@ const router = express.Router();
 // Ürünler
 router.get('/find/:id', validateProductId, productController.getAProduct);
 router.get('/', productController.getAllProduct);
+router.get('/featured', productController.getFeaturedProducts);
 
 // Admin ürün yönetimi
 router.post('/admin/products', authenticateToken, requireAdmin, upload.array('images', 6), validateCreateProduct, productController.createProduct);

@@ -4,7 +4,8 @@ import {
     updateReviewService,
     deleteReviewService,
     approveReviewService,
-    getAllReviewsService
+    getAllReviewsService,
+    checkUserReviewService,
 } from "../services/reviewService.js";
 
 export const createReview = async (req, res) => {
@@ -64,6 +65,24 @@ export const approveReview = async (req, res) => {
         const { reviewId } = req.params;
         const { approved } = req.body;
         const review = await approveReviewService(reviewId, approved);
+        return res.status(200).json(review);
+    } catch (e) {
+        return res.status(400).json({ message: e.message });
+    }
+};
+
+// Kullanıcının belirli bir ürün için yorum yapıp yapmadığını kontrol et
+export const checkUserReview = async (req, res) => {
+    try {
+        const { productId } = req.params;
+        const userId = req.user._id;
+        
+        const review = await checkUserReviewService(userId, productId);
+        
+        if (!review) {
+            return res.status(404).json({ message: "Bu ürün için yorum bulunamadı" });
+        }
+        
         return res.status(200).json(review);
     } catch (e) {
         return res.status(400).json({ message: e.message });

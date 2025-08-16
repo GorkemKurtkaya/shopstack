@@ -134,7 +134,22 @@ export const updateProfileService = async (userId, data) => {
     if (phoneNumber !== undefined) user.phoneNumber = phoneNumber;
     if (favoriteCategories !== undefined) user.favoriteCategories = favoriteCategories;
     await user.save();
-    return { message: 'Profil güncellendi' };
+    
+    // Güncel kullanıcı bilgilerini döndür
+    return { 
+        message: 'Profil güncellendi',
+        user: {
+            id: user._id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            role: user.role,
+            phoneNumber: user.phoneNumber,
+            addresses: user.addresses,
+            favoriteCategories: user.favoriteCategories,
+            emailVerified: user.emailVerified,
+        }
+    };
 };
 
 // Adres güncelleme servisi
@@ -144,5 +159,10 @@ export const updateAddressService = async (userId, addresses) => {
     if (!user) throw new Error('User not found');
     user.addresses = addresses;
     await user.save();
-    return { message: 'Adresler güncellendi' };
+    
+    // Güncel adresleri döndür
+    return { 
+        message: 'Adresler güncellendi',
+        addresses: user.addresses 
+    };
 };

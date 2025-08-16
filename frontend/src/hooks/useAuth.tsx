@@ -112,7 +112,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (data.user.role === 'admin') {
           router.push('/admin/dashboard');
         } else {
-          router.push('/shop');
+          router.push('/');
         }
         
         return { success: true };
@@ -160,7 +160,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const responseData = await response.json();
         setUser(responseData.user);
         
-        router.push('/shop');
+        router.push('/');
         return { success: true };
       } else {
         const errorData: BackendResponse = await response.json();

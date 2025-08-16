@@ -131,6 +131,29 @@ export const deleteReview = async (reviewId: string): Promise<void> => {
   }
 };
 
+// Kullanıcının belirli bir ürün için yorum yapıp yapmadığını kontrol et
+export const checkUserReview = async (productId: string): Promise<Review | null> => {
+  try {
+    const response = await fetch(`${BASE_URL}/reviews/user/${productId}`, {
+      credentials: 'include'
+    });
+    
+    if (response.status === 404) {
+      // Kullanıcı bu ürün için yorum yapmamış
+      return null;
+    }
+    
+    if (!response.ok) {
+      throw new Error('Yorum kontrolü yapılırken bir hata oluştu');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Yorum kontrol hatası:', error);
+    return null;
+  }
+};
+
 // Yorum onayla (admin için)
 export const approveReview = async (reviewId: string, approved: boolean = true): Promise<Review> => {
   try {
