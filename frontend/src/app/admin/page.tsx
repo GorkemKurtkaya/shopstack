@@ -8,7 +8,6 @@ export default function AdminPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // /admin'e geldiğinde otomatik olarak /admin/dashboard'a yönlendir
     router.replace('/admin/dashboard');
   }, [router]);
 

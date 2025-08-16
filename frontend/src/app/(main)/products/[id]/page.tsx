@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { 
-  Card, 
-  Button, 
-  Space, 
-  Empty, 
-  Spin, 
-  message, 
+import {
+  Card,
+  Button,
+  Space,
+  Empty,
+  Spin,
+  message,
   Tag,
   Row,
   Col,
@@ -23,10 +23,10 @@ import {
   Avatar,
   List
 } from 'antd';
-import { 
-  ShoppingCartOutlined, 
-  EyeOutlined, 
-  LeftOutlined, 
+import {
+  ShoppingCartOutlined,
+  EyeOutlined,
+  LeftOutlined,
   RightOutlined,
   UserOutlined,
   StarOutlined,
@@ -57,7 +57,8 @@ export default function ProductDetailPage() {
   const [userReview, setUserReview] = useState<Review | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [category, setCategory] = useState<Category | null>(null);
-  
+  const [showFullDescription, setShowFullDescription] = useState(false);
+
   const { incrementCartCount, isAuthenticated } = useCart();
   const router = useRouter();
   const params = useParams();
@@ -76,7 +77,7 @@ export default function ProductDetailPage() {
       setLoading(true);
       const productData = await getProductById(productId);
       setProduct(productData);
-      
+
       // Kategori bilgisini yükle
       if (productData.category && typeof productData.category === 'string') {
         try {
@@ -86,7 +87,7 @@ export default function ProductDetailPage() {
           console.error('Category load error:', error);
         }
       }
-      
+
       // Kullanıcının bu ürün için yorum yapıp yapmadığını kontrol et
       if (isAuthenticated) {
         try {
@@ -131,7 +132,7 @@ export default function ProductDetailPage() {
 
     try {
       const result = await addToCart(productId, quantity);
-      
+
       if (result.success) {
         message.success(result.message);
         incrementCartCount(quantity);
@@ -157,24 +158,24 @@ export default function ProductDetailPage() {
   const handleSubmitReview = async (values: any) => {
     try {
       setReviewLoading(true);
-      
+
       const reviewData: CreateReviewData = {
         productId,
         rating: values.rating,
         comment: values.comment
       };
-      
+
       const newReview = await createReview(reviewData);
-      
+
       // Yorumları yeniden yükle
       await loadReviews();
-      
+
       // Kullanıcının yorumunu güncelle
       setUserReview(newReview);
-      
+
       message.success('Yorumunuz başarıyla gönderildi!');
       closeReviewModal();
-      
+
     } catch (error) {
       console.error('Review submission error:', error);
       message.error('Yorum gönderilirken hata oluştu');
@@ -187,9 +188,8 @@ export default function ProductDetailPage() {
   const CustomArrow = ({ type, onClick }: { type: 'prev' | 'next'; onClick?: () => void }) => (
     <button
       onClick={onClick}
-      className={`absolute top-1/2 transform -translate-y-1/2 z-10 w-10 h-10 bg-white bg-opacity-90 hover:bg-opacity-100 text-gray-700 hover:text-blue-600 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl ${
-        type === 'prev' ? 'left-4' : 'right-4'
-      }`}
+      className={`absolute top-1/2 transform -translate-y-1/2 z-10 w-10 h-10 bg-white bg-opacity-90 hover:bg-opacity-100 text-gray-700 hover:text-blue-600 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl ${type === 'prev' ? 'left-4' : 'right-4'
+        }`}
     >
       {type === 'prev' ? <LeftOutlined className="text-lg" /> : <RightOutlined className="text-lg" />}
     </button>
@@ -229,8 +229,8 @@ export default function ProductDetailPage() {
           <div className="mb-8">
             <div className="flex items-center space-x-4">
               <Link href="/products">
-                <Button 
-                  type="text" 
+                <Button
+                  type="text"
                   icon={<ArrowLeftOutlined />}
                   className="text-gray-600 hover:text-blue-600"
                 >
@@ -242,41 +242,40 @@ export default function ProductDetailPage() {
 
           {/* Product Details */}
           <Row gutter={[48, 24]}>
-            {/* Sol Kolon - Ürün Görselleri */}
             <Col xs={24} lg={12}>
               <Card className="shadow-lg border-0 rounded-xl">
                 {hasMultipleImages ? (
-                                     <Carousel
-                     autoplay={false}
-                     dots={false}
-                     arrows={true}
-                     prevArrow={<CustomArrow type="prev" />}
-                     nextArrow={<CustomArrow type="next" />}
-                     className="product-detail-carousel"
-                     afterChange={(current) => setSelectedImageIndex(current)}
-                   >
+                  <Carousel
+                    autoplay={false}
+                    dots={false}
+                    arrows={true}
+                    prevArrow={<CustomArrow type="prev" />}
+                    nextArrow={<CustomArrow type="next" />}
+                    className="product-detail-carousel"
+                    afterChange={(current) => setSelectedImageIndex(current)}
+                  >
                     {images.map((image, index) => (
-                      <div key={index} className="flex items-center justify-center h-96">
+                      <div key={index} className="flex items-center justify-center h-96 overflow-hidden">
                         <Image
                           src={getImageUrl(image)}
                           alt={`${product.name} - Görsel ${index + 1}`}
-                          width={500}
-                          height={500}
+                          width={400}
+                          height={400}
                           className="max-w-full max-h-full object-contain"
                         />
                       </div>
                     ))}
                   </Carousel>
                 ) : (
-                  <div className="flex items-center justify-center h-96">
-                    <Image
-                      src={getImageUrl(images[0] || '')}
-                      alt={product.name}
-                      width={500}
-                      height={500}
-                      className="max-w-full max-h-full object-contain"
-                    />
-                  </div>
+                                     <div className="flex items-center justify-center h-96 overflow-hidden">
+                     <Image
+                       src={getImageUrl(images[0] || '')}
+                       alt={product.name}
+                       width={400}
+                       height={400}
+                       className="max-w-full max-h-full object-contain"
+                     />
+                   </div>
                 )}
 
                 {/* Küçük Görsel Thumbnails */}
@@ -286,11 +285,10 @@ export default function ProductDetailPage() {
                       <button
                         key={index}
                         onClick={() => setSelectedImageIndex(index)}
-                        className={`w-16 h-16 border-2 rounded-lg overflow-hidden transition-all duration-200 ${
-                          index === selectedImageIndex 
-                            ? 'border-blue-500 shadow-lg' 
+                        className={`w-16 h-16 border-2 rounded-lg overflow-hidden transition-all duration-200 ${index === selectedImageIndex
+                            ? 'border-blue-500 shadow-lg'
                             : 'border-gray-200 hover:border-gray-300'
-                        }`}
+                          }`}
                       >
                         <Image
                           src={getImageUrl(image)}
@@ -298,6 +296,11 @@ export default function ProductDetailPage() {
                           width={64}
                           height={64}
                           className="w-full h-full object-cover"
+                          style={{
+                            objectFit: 'cover',
+                            width: '100%',
+                            height: '100%'
+                          }}
                         />
                       </button>
                     ))}
@@ -334,20 +337,20 @@ export default function ProductDetailPage() {
                     </Text>
                   </div>
 
-                                     {/* Kategori */}
-                   {(product.category || category) && (
-                     <div>
-                       <Text className="text-gray-600 text-sm">Kategori:</Text>
-                       <div className="mt-1">
-                         <Tag color="blue" className="text-sm">
-                           {typeof product.category === 'object' 
-                             ? product.category.name 
-                             : category?.name || 'Kategori Yükleniyor...'
-                           }
-                         </Tag>
-                       </div>
-                     </div>
-                   )}
+                  {/* Kategori */}
+                  {(product.category || category) && (
+                    <div>
+                      <Text className="text-gray-600 text-sm">Kategori:</Text>
+                      <div className="mt-1">
+                        <Tag color="blue" className="text-sm">
+                          {typeof product.category === 'object'
+                            ? product.category.name
+                            : category?.name || 'Kategori Yükleniyor...'
+                          }
+                        </Tag>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Stok Durumu */}
                   <div className="flex items-center space-x-3">
@@ -367,9 +370,30 @@ export default function ProductDetailPage() {
                   {/* Açıklama */}
                   <div>
                     <Text className="text-gray-600 text-sm">Açıklama:</Text>
-                    <Paragraph className="mt-2 text-gray-700">
-                      {product.description}
-                    </Paragraph>
+                    <div className="mt-2">
+                      {product.description.length > 150 ? (
+                        <div>
+                          <Paragraph className="text-gray-700 mb-2">
+                            {showFullDescription
+                              ? product.description
+                              : `${product.description.substring(0, 150)}...`
+                            }
+                          </Paragraph>
+                          <Button
+                            type="link"
+                            size="small"
+                            onClick={() => setShowFullDescription(!showFullDescription)}
+                            className="p-0 h-auto text-blue-600 hover:text-blue-800"
+                          >
+                            {showFullDescription ? 'Daha az göster' : 'Devamını oku'}
+                          </Button>
+                        </div>
+                      ) : (
+                        <Paragraph className="text-gray-700">
+                          {product.description}
+                        </Paragraph>
+                      )}
+                    </div>
                   </div>
 
                   {/* Miktar Seçimi */}
@@ -449,7 +473,7 @@ export default function ProductDetailPage() {
                       ({rating.toFixed(1)} ortalama)
                     </Text>
                   </div>
-                  
+
                   {/* Yorum Yap Butonu */}
                   {isAuthenticated && !userReview && (
                     <Button
@@ -460,7 +484,7 @@ export default function ProductDetailPage() {
                       Yorum Yap
                     </Button>
                   )}
-                  
+
                   {/* Kullanıcının yorumu varsa göster */}
                   {isAuthenticated && userReview && (
                     <Tag color="green" icon={<StarOutlined />}>
@@ -475,33 +499,33 @@ export default function ProductDetailPage() {
                   <Spin size="large" />
                 </div>
               ) : reviews.length === 0 ? (
-                <Empty 
+                <Empty
                   description="Henüz yorum yapılmamış"
                   image={Empty.PRESENTED_IMAGE_SIMPLE}
                 />
               ) : (
-                                 <List
-                   itemLayout="horizontal"
-                   dataSource={reviews}
-                   renderItem={(review) => (
-                     <List.Item>
-                       <div className="flex space-x-4 w-full">
-                         <Avatar icon={<UserOutlined />} />
-                         <div className="flex-1 min-w-0">
-                           <div className="flex items-center space-x-2 mb-2">
-                             <Text strong>{review.user.name}</Text>
-                             <Rate disabled defaultValue={review.rating} className="text-sm" />
-                           </div>
-                           <Paragraph className="mb-2">{review.comment}</Paragraph>
-                           <div className="flex items-center space-x-2 text-xs text-gray-500">
-                             <CalendarOutlined />
-                             <span>{new Date(review.createdAt).toLocaleDateString('tr-TR')}</span>
-                           </div>
-                         </div>
-                       </div>
-                     </List.Item>
-                   )}
-                 />
+                <List
+                  itemLayout="horizontal"
+                  dataSource={reviews}
+                  renderItem={(review) => (
+                    <List.Item>
+                      <div className="flex space-x-4 w-full">
+                        <Avatar icon={<UserOutlined />} />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <Text strong>{review.user.name}</Text>
+                            <Rate disabled defaultValue={review.rating} className="text-sm" />
+                          </div>
+                          <Paragraph className="mb-2">{review.comment}</Paragraph>
+                          <div className="flex items-center space-x-2 text-xs text-gray-500">
+                            <CalendarOutlined />
+                            <span>{new Date(review.createdAt).toLocaleDateString('tr-TR')}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </List.Item>
+                  )}
+                />
               )}
             </Card>
           </div>
@@ -532,7 +556,7 @@ export default function ProductDetailPage() {
               label="Puanınız"
               rules={[{ required: true, message: 'Lütfen puan verin!' }]}
             >
-              <Rate 
+              <Rate
                 allowHalf={false}
                 className="text-2xl"
                 tooltips={['Çok Kötü', 'Kötü', 'Orta', 'İyi', 'Çok İyi']}

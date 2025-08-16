@@ -3,13 +3,12 @@
 import { Carousel, Button } from 'antd';
 import Image from 'next/image';
 
-// Carousel banner verileri
 const bannerData = [
   {
     id: 1,
     title: "Yeni Sezon Ürünleri",
     subtitle: "%50'ye varan indirimler",
-    image: "/images/banner1.jpg", // Local resim
+    image: "/banner1.jpeg", 
     buttonText: "Alışverişe Başla",
     buttonLink: "/products"
   },
@@ -17,7 +16,7 @@ const bannerData = [
     id: 2,
     title: "Teknoloji Fırsatları",
     subtitle: "En son teknoloji ürünleri",
-    image: "/images/banner2.jpg", // Local resim
+    image: "/banner2.jpeg", 
     buttonText: "Keşfet",
     buttonLink: "/categories/technology"
   },
@@ -25,7 +24,7 @@ const bannerData = [
     id: 3,
     title: "Ücretsiz Kargo",
     subtitle: "150 TL üzeri alışverişlerde",
-    image: "/images/banner3.jpg", // Local resim
+    image: "/banner3.jpeg", 
     buttonText: "Alışveriş Yap",
     buttonLink: "/products"
   }

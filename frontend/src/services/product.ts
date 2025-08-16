@@ -55,7 +55,7 @@ export interface Product {
 export interface CreateProductData {
   name: string;
   description: string;
-  images: string[];
+  images: (string | File)[];
   category: string;
   price: number;
   stock: number;
@@ -137,13 +137,36 @@ export const getProductById = async (id: string): Promise<Product> => {
 // Yeni ürün oluştur
 export const createProduct = async (productData: CreateProductData): Promise<Product> => {
   try {
+    // FormData kullanarak resimleri yükle
+    const formData = new FormData();
+    
+    // Temel ürün bilgilerini ekle
+    formData.append('name', productData.name);
+    formData.append('description', productData.description);
+    formData.append('category', productData.category);
+    formData.append('price', productData.price.toString());
+    formData.append('stock', productData.stock.toString());
+    formData.append('tags', JSON.stringify(productData.tags));
+    formData.append('featured', productData.featured.toString());
+    formData.append('specifications', JSON.stringify(productData.specifications));
+    formData.append('variants', JSON.stringify(productData.variants));
+    
+    // Resimleri ekle
+    if (productData.images && productData.images.length > 0) {
+      productData.images.forEach((image, index) => {
+        if (image instanceof File) {
+          formData.append('images', image);
+        } else if (typeof image === 'string') {
+          // Eğer resim zaten bir string path ise, onu da ekle
+          formData.append('imagePaths', image);
+        }
+      });
+    }
+    
     const response = await fetch(`${BASE_URL}/product/admin/products`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       credentials: 'include',
-      body: JSON.stringify(productData)
+      body: formData
     });
     
     if (!response.ok) {

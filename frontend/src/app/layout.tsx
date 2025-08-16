@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ConfigProvider } from 'antd';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,7 +29,16 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
-        {children}
+        <ConfigProvider
+          theme={{
+            token: {
+              // Ant Design v5 compatible mode
+              borderRadius: 6,
+            },
+          }}
+        >
+          {children}
+        </ConfigProvider>
       </body>
     </html>
   );

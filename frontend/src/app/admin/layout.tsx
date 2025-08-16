@@ -19,7 +19,6 @@ const AdminLayout = memo(({ children }: AdminLayoutProps) => {
       <div className="min-h-screen bg-[#F8F9FE]/60">
         <Sidebar isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
 
-        {/* Main Content */}
         <div className={`transition-all duration-150 ease-out ${isSidebarOpen ? 'ml-64' : 'ml-0'}`}>
           {!isSidebarOpen && (
             <button

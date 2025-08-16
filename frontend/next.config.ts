@@ -5,7 +5,18 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ['antd']
   },
+  env: {
+    ANTD_COMPATIBLE: 'true'
+  },
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'antd': require.resolve('antd'),
+    };
+    return config;
+  },
   images: {
+    domains: ['localhost'],
     remotePatterns: [
       {
         protocol: 'https',
