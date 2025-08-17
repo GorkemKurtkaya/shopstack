@@ -116,39 +116,76 @@ Base URL: `http://localhost:8000`
 
 Detaylı API dökümantasyonu için Postman sayfamı ziyaret edin: [Postman Docs](https://documenter.getpostman.com/view/33385054/2sB3BHm9Va)
 
-Auth
-- POST `/auth/register`
-- POST `/auth/login`
-- GET `/auth/logout`
-- GET `/auth/me`
-- POST `/auth/forgot-password`
-- POST `/auth/reset-password`
+### Auth
+| Method | Endpoint | Açıklama |
+|---|---|---|
+| POST | `/auth/register` | Kayıt |
+| POST | `/auth/login` | Giriş (httpOnly cookie + token) |
+| GET | `/auth/logout` | Çıkış |
+| GET | `/auth/me` | Oturum sahibi kullanıcı |
+| POST | `/auth/forgot-password` | Şifre sıfırlama isteği |
+| POST | `/auth/reset-password` | Şifre sıfırlama |
+| GET | `/auth/check-auth` | Oturum kontrolü |
+| GET | `/auth/check-admin` | Admin kontrolü |
 
-Ürünler
-- GET `/product` (liste)
-- GET `/product/find/:id`
-- GET `/product/featured`
-- POST `/product/admin/products` (form-data; images[])
-- PUT `/product/admin/products/:id` (form-data; images[] + removeImages)
-- DELETE `/product/admin/products/:id`
+### Ürünler
+| Method | Endpoint | Açıklama |
+|---|---|---|
+| GET | `/product` | Ürün listele (filtre/sıralama destekli) |
+| GET | `/product/find/:id` | Ürün detayı |
+| GET | `/product/featured` | Öne çıkan ürünler |
+| POST | `/product/admin/products` | Ürün oluştur (form-data; `images[]`) |
+| PUT | `/product/admin/products/:id` | Ürün güncelle (form-data; `images[]`, `removeImages`) |
+| DELETE | `/product/admin/products/:id` | Ürün sil |
 
-Kategoriler
-- GET `/categories`
-- POST `/categories` (admin)
+### Kategoriler
+| Method | Endpoint | Açıklama |
+|---|---|---|
+| GET | `/categories/active` | Aktif kategoriler (public) |
+| GET | `/categories` | Tüm kategoriler |
+| GET | `/categories/:id` | Tek kategori |
+| POST | `/admin/categories` | Kategori oluştur (admin) |
+| PUT | `/admin/categories/:id` | Kategori güncelle (admin) |
+| DELETE | `/admin/categories/:id` | Kategori sil (admin) |
 
-Siparişler
-- GET `/orders/find/:orderId`
-- GET `/orders/find/:userId`
-- POST `/orders`
+### Siparişler
+| Method | Endpoint | Açıklama |
+|---|---|---|
+| POST | `/orders` | Sipariş oluştur |
+| PUT | `/orders/:id` | Sipariş güncelle |
+| PUT | `/orders/status/:id` | Sipariş durum güncelle |
+| GET | `/orders/find/:userId` | Kullanıcının siparişleri |
+| GET | `/orders/findorder/:id` | Tek sipariş detayı |
+| DELETE | `/orders/:id` | Sipariş sil (admin) |
+| GET | `/orders` | Tüm siparişler (admin) |
+| GET | `/orders/income` | Gelir istatistiği (admin) |
 
-Yorumlar
-- GET `/reviews/:productId`
-- POST `/reviews`
-- PUT `/reviews/:id`
-- DELETE `/reviews/:id`
-- GET `/reviews/user/:productId` (kullanıcının yorum yapıp yapmadığı)
+### Yorumlar
+| Method | Endpoint | Açıklama |
+|---|---|---|
+| GET | `/reviews/:productId` | Ürün yorumları (public) |
+| POST | `/reviews` | Yorum oluştur (auth) |
+| PUT | `/reviews/:reviewId` | Yorum güncelle (auth) |
+| DELETE | `/reviews/:reviewId` | Yorum sil (auth) |
+| GET | `/reviews/user/:productId` | Kullanıcının bu ürüne yorumu var mı? |
+| GET | `/reviews/all` | Tüm yorumlar (admin) |
+| POST | `/reviews/:reviewId/approve` | Yorum onayı (admin) |
 
-Detaylı API dökümantasyonu için Postman sayfamı ziyaret edin: [Postman Docs](https://documenter.getpostman.com/view/33385054/2sB3BHm9Va)
+### Sepet (Basket)
+| Method | Endpoint | Açıklama |
+|---|---|---|
+| POST | `/basket/add` | Sepete ekle |
+| GET | `/basket/me` | Kullanıcının sepeti |
+| DELETE | `/basket/me` | Sepeti temizle |
+| POST | `/basket/update` | Ürün miktarını artır/azalt |
+
+### Kullanıcılar
+| Method | Endpoint | Açıklama |
+|---|---|---|
+| GET | `/users/:id` | Tek kullanıcı (public) |
+| PUT | `/users/changeNameandMail` | Me hesabında ad/e‑posta güncelle (auth) |
+| PUT | `/users/:id` | Kullanıcı güncelle (admin) |
+| DELETE | `/users/:id` | Kullanıcı sil (admin) |
 
 Örnek İstek (Ürün Güncelle – form-data)
 ```bash
