@@ -11,6 +11,16 @@
 ## Proje Açıklaması
 ShopStack; ürün yönetimi, sepet ve sipariş süreçleri, kullanıcı yorumları ve güçlü bir admin paneli içeren tam kapsamlı bir e‑ticaret uygulamasıdır. Redis, MongoDB ve modern Next.js 15 tabanlı bir frontend ile gelir.
 
+### Başlatma İpuçları
+Gerekli bileşenleri (Node.js, Docker, MongoDB) kurduktan sonra hızlıca denemek için:
+- Redis’i başlatın: `docker compose up -d redis`
+- Backend bağımlılıkları: `cd backend && npm i`
+- Örnek verileri yükleyin (seed): `node seed.js`
+  - Alternatif: proje kökünden `node backend/seed.js`
+- Backend’i çalıştırın: `npm run start` (backend klasöründe)
+- Frontend bağımlılıkları ve çalışma: `cd ../frontend && npm i && npm run dev`
+- Demo admin ile giriş: `admin@gmail.com` / `123456!`
+
 ## Teknoloji Yığını
 | Katman | Teknolojiler |
 |---|---|
