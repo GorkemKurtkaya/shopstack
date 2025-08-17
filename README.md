@@ -43,11 +43,14 @@ DB_URI=mongodb://localhost:27017/
 JWT_SECRET=supersecret
 JWT_EXPIRES_IN=7d
 APP_URL=http://localhost:8000
-SMTP_HOST=smtp.example.com
-SMTP_PORT=587
-SMTP_USER=your_user
-SMTP_PASS=your_pass
 REDIS_URL=redis://localhost:6379
+
+# E-posta ayarları (Gmail önerilir)
+# MAIL_FROM: Gönderici görünen adres (örn: ShopStack <noreply@shopstack.com>)
+# EMAIL & PASSWORD: Gmail hesabınız ve uygulama şifresi
+MAIL_FROM="ShopStack <noreply@shopstack.com>"
+EMAIL=ornek@gmail.com
+PASSWORD=uygulama_sifresi
 ```
 
 5) Seed (örnek veri yükleme)
@@ -84,6 +87,8 @@ Müşteri
 | Sepet | `docs/screens/cart.png` |
 | Profil | `docs/screens/profile.png` |
 | Siparişler | `docs/screens/orders.png` |
+| Giriş | `docs/screens/login.png` |
+| Kayıt | `docs/screens/register.png` |
 
 Admin
 
@@ -161,3 +166,15 @@ curl -X PUT "http://localhost:8000/product/admin/products/PRODUCT_ID" \
 - İlk çalıştırmadan önce `docker compose up -d redis` komutu ile Redis’in ayakta olduğundan emin olun.
 - Seed script’inde admin kullanıcı: `admin@gmail.com` / `123456!`
 - Görseller `backend/uploads` altında servis edilir; örnek seed görselleri `/uploads/...` olarak gelir.
+
+### Gmail ile e-posta gönderimi nasıl aktif edilir?
+1) Gmail hesabınızda iki adımlı doğrulamayı açın (Google Hesap > Güvenlik > İki adımlı doğrulama).
+2) Aynı sayfadan “Uygulama şifreleri” oluşturun.
+3) Uygulama olarak “Mail”, cihaz olarak “Diğer (Özel ad)” seçip bir uygulama şifresi üretin.
+4) README’deki `.env` alanlarına:
+   - `EMAIL` = Gmail adresiniz
+   - `PASSWORD` = Ürettiğiniz uygulama şifresi (normal şifre değil)
+   - `MAIL_FROM` = Gönderici görünen ad/adres (örn: `ShopStack <noreply@shopstack.com>`)
+5) Sunucuyu yeniden başlatın.
+
+Not: `EMAIL` ve `PASSWORD` belirtilmezse geliştirme modunda e‑postalar gerçek gönderilmez, konsola yazdırılır (backend/utils/mailer.js).
