@@ -1,7 +1,7 @@
 # ShopStack
 
 <div align="center">
-  <img src="icon-512x512.png" alt="ShopStack" width="120" />
+  <img src="icon-512x512.png" alt="ShopStack" width="256" />
   <br/>
   <b>Modern e-ticaret uygulaması</b>
 </div>
@@ -91,27 +91,30 @@ Müşteri
 
 | Sayfa | Görsel |
 |---|---|
-| Ana Sayfa | `docs/screens/home.png` |
-| Ürünler | `docs/screens/products.png` |
-| Ürün Detayı | `docs/screens/product-detail.png` |
-| Sepet | `docs/screens/cart.png` |
-| Profil | `docs/screens/profile.png` |
-| Siparişler | `docs/screens/orders.png` |
-| Giriş | `docs/screens/login.png` |
-| Kayıt | `docs/screens/register.png` |
+| Ana Sayfa | <img width="1904" height="917" alt="image" src="https://github.com/user-attachments/assets/7f5c8c26-e60b-47e8-b71c-140798edb8c0" /> |
+| Ürünler | <img width="1903" height="920" alt="image" src="https://github.com/user-attachments/assets/fa78d449-1f1e-48b6-b803-e44457ce281d" /> |
+| Ürün Detayı | <img width="1797" height="916" alt="image" src="https://github.com/user-attachments/assets/c4bbd44c-b597-4a6c-a087-810a18465a01" /> |
+| Sepet | <img width="1725" height="898" alt="image" src="https://github.com/user-attachments/assets/77511611-4c09-498c-961c-9c2830d35647" /> |
+| Profil | <img width="1648" height="834" alt="image" src="https://github.com/user-attachments/assets/596eeba4-417f-4226-8804-7fdc649544c5" /> |
+| Siparişler | <img width="1739" height="916" alt="image" src="https://github.com/user-attachments/assets/94c8a104-0804-4c72-aec7-af0a75c65b35" /> <img width="1721" height="918" alt="image" src="https://github.com/user-attachments/assets/e8bacf72-be9f-4faf-91bb-e01064292d0d" />|
+| Giriş | <img width="1549" height="901" alt="image" src="https://github.com/user-attachments/assets/1711d44e-b0d9-45fd-9ac7-a2808657b71b" /> |
+| Kayıt | <img width="1448" height="915" alt="image" src="https://github.com/user-attachments/assets/02577b5a-1c6a-45c6-bfa2-5f2080ea3e28" /> |
 
 Admin
 
 | Sayfa | Görsel |
 |---|---|
-| Dashboard | `docs/screens/admin-dashboard.png` |
-| Ürünler | `docs/screens/admin-products.png` |
-| Kategoriler | `docs/screens/admin-categories.png` |
-| Yorumlar | `docs/screens/admin-reviews.png` |
-| Kullanıcılar | `docs/screens/admin-users.png` |
+| Dashboard | <img width="1919" height="917" alt="image" src="https://github.com/user-attachments/assets/bc4be12a-31c0-4b82-aacf-03eee8a7b597" /> |
+| Ürünler | <img width="1919" height="919" alt="image" src="https://github.com/user-attachments/assets/65ca440e-4b1b-4e7a-86d1-f4fc00091d61" /> <img width="1903" height="915" alt="image" src="https://github.com/user-attachments/assets/1280427a-4845-46ee-a687-ba68d1922854" /> |
+| Kategoriler | <img width="1905" height="920" alt="image" src="https://github.com/user-attachments/assets/849059fd-e9b5-4158-9bc9-0bc771e153d4" /> |
+| Siparişler | <img width="1919" height="856" alt="image" src="https://github.com/user-attachments/assets/85a87ca9-5a48-4515-8233-33072990d21f" /> |
+| Yorumlar | <img width="1919" height="799" alt="Screenshot_14" src="https://github.com/user-attachments/assets/6711b1d2-ed6f-49b7-a1cc-c143ed4f4823" /> |
+| Kullanıcılar | <img width="1919" height="773" alt="Screenshot_1" src="https://github.com/user-attachments/assets/1e4e1c84-54a5-4506-91ac-bdad51d177d8" /> |
 
 ## API (Özet)
 Base URL: `http://localhost:8000`
+
+Detaylı API dökümantasyonu için Postman sayfamı ziyaret edin: [Postman Docs](https://documenter.getpostman.com/view/33385054/2sB3BHm9Va)
 
 Auth
 - POST `/auth/register`
@@ -188,3 +191,4 @@ curl -X PUT "http://localhost:8000/product/admin/products/PRODUCT_ID" \
 5) Sunucuyu yeniden başlatın.
 
 Not: `EMAIL` ve `PASSWORD` belirtilmezse geliştirme modunda e‑postalar gerçek gönderilmez, konsola yazdırılır (backend/utils/mailer.js).
+
