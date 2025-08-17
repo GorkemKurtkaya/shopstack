@@ -29,6 +29,7 @@ import {
   IconX
 } from '@tabler/icons-react';
 import { getProductById, updateProductWithForm, Product, getImageUrl } from '@/services/product';
+import { getAllCategories, Category } from '@/services/category';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -53,10 +54,13 @@ export default function ProductEditModal({
   const [initialLoading, setInitialLoading] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [removedImages, setRemovedImages] = useState<string[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
 
   useEffect(() => {
     if (visible && productId) {
       fetchProduct();
+      fetchCategories();
     }
   }, [visible, productId]);
 
@@ -71,7 +75,7 @@ export default function ProductEditModal({
         form.setFieldsValue({
           name: data.name,
           description: data.description,
-          category: data.category,
+          category: typeof data.category === 'string' ? data.category : (data.category as any)?._id,
           price: data.price,
           stock: data.stock,
           tags: data.tags.join(', '),
@@ -91,6 +95,19 @@ export default function ProductEditModal({
       onCancel();
     } finally {
       setInitialLoading(false);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      setCategoriesLoading(true);
+      const list = await getAllCategories();
+      setCategories(list);
+    } catch (error) {
+      // kategori yüklenemese de form kullanılabilir
+      console.error('Kategoriler yüklenemedi:', error);
+    } finally {
+      setCategoriesLoading(false);
     }
   };
 
@@ -209,10 +226,13 @@ export default function ProductEditModal({
                       label="Kategori"
                       rules={[{ required: true, message: 'Kategori gereklidir!' }]}
                     >
-                      <Input 
-                        placeholder="Kategori ID'si" 
-                        className="border-2 border-gray-300 focus:border-blue-500 rounded-lg"
-                        size="large"
+                      <Select
+                        loading={categoriesLoading}
+                        placeholder="Kategori seçin"
+                        showSearch
+                        optionFilterProp="label"
+                        className="w-full"
+                        options={categories.map(c => ({ label: c.name, value: c._id }))}
                       />
                     </Form.Item>
                   </Col>

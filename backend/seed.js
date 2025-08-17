@@ -221,18 +221,6 @@ async function run() {
 
     const orders = [
       {
-        _id: new mongoose.Types.ObjectId('689f5baad2ebc99b6da5bdc6'),
-        user: admin._id,
-        orderItems: [
-          { product: new mongoose.Types.ObjectId('68a1cf409241c8f5bed8320f'), quantity: 2, price: 12999, variant: { size: '128GB', color: 'black' } },
-          { product: new mongoose.Types.ObjectId('68a1ce1f9241c8f5bed831a3'), quantity: 1 },
-        ],
-        shippingAddress: { street: 'Deneme Cad. 1', city: 'Istanbul', state: 'TR', zipCode: '34000', country: 'TR' },
-        paymentInfo: { method: 'card', status: 'paid', transactionId: 'fake_tx_123' },
-        totalAmount: 88498,
-        status: 'delivered',
-      },
-      {
         _id: new mongoose.Types.ObjectId('68a1d9f6797dcaf65eb50c8b'),
         user: admin._id,
         orderItems: [
