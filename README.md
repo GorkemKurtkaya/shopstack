@@ -87,29 +87,22 @@ npm run dev
 - Müşteri: İsterseniz kayıt formundan yeni kullanıcı oluşturabilirsiniz (seed yalnızca admin oluşturur).
 
 ## Sayfa Önizlemeleri
-Müşteri
+Müşteri (yan yana tablo – kompakt)
 
-| Sayfa | Görsel |
-|---|---|
-| Ana Sayfa | <img width="1904" height="917" alt="image" src="https://github.com/user-attachments/assets/7f5c8c26-e60b-47e8-b71c-140798edb8c0" /> |
-| Ürünler | <img width="1903" height="920" alt="image" src="https://github.com/user-attachments/assets/fa78d449-1f1e-48b6-b803-e44457ce281d" /> |
-| Ürün Detayı | <img width="1797" height="916" alt="image" src="https://github.com/user-attachments/assets/c4bbd44c-b597-4a6c-a087-810a18465a01" /> |
-| Sepet | <img width="1725" height="898" alt="image" src="https://github.com/user-attachments/assets/77511611-4c09-498c-961c-9c2830d35647" /> |
-| Profil | <img width="1648" height="834" alt="image" src="https://github.com/user-attachments/assets/596eeba4-417f-4226-8804-7fdc649544c5" /> |
-| Siparişler | <img width="1739" height="916" alt="image" src="https://github.com/user-attachments/assets/94c8a104-0804-4c72-aec7-af0a75c65b35" /> <img width="1721" height="918" alt="image" src="https://github.com/user-attachments/assets/e8bacf72-be9f-4faf-91bb-e01064292d0d" />|
-| Giriş | <img width="1549" height="901" alt="image" src="https://github.com/user-attachments/assets/1711d44e-b0d9-45fd-9ac7-a2808657b71b" /> |
-| Kayıt | <img width="1448" height="915" alt="image" src="https://github.com/user-attachments/assets/02577b5a-1c6a-45c6-bfa2-5f2080ea3e28" /> |
+| Sayfa | Görsel | Sayfa | Görsel |
+|---|---|---|---|
+| Ana Sayfa | <img width="360" alt="home" src="https://github.com/user-attachments/assets/7f5c8c26-e60b-47e8-b71c-140798edb8c0" /> | Ürünler | <img width="360" alt="products" src="https://github.com/user-attachments/assets/fa78d449-1f1e-48b6-b803-e44457ce281d" /> |
+| Ürün Detayı | <img width="360" alt="product-detail" src="https://github.com/user-attachments/assets/c4bbd44c-b597-4a6c-a087-810a18465a01" /> | Sepet | <img width="360" alt="cart" src="https://github.com/user-attachments/assets/77511611-4c09-498c-961c-9c2830d35647" /> |
+| Profil | <img width="360" alt="profile" src="https://github.com/user-attachments/assets/596eeba4-417f-4226-8804-7fdc649544c5" /> | Siparişler | <img width="360" alt="orders" src="https://github.com/user-attachments/assets/94c8a104-0804-4c72-aec7-af0a75c65b35" /> |
+| Giriş | <img width="360" alt="login" src="https://github.com/user-attachments/assets/1711d44e-b0d9-45fd-9ac7-a2808657b71b" /> | Kayıt | <img width="360" alt="register" src="https://github.com/user-attachments/assets/02577b5a-1c6a-45c6-bfa2-5f2080ea3e28" /> |
 
-Admin
+Admin (yan yana tablo – kompakt)
 
-| Sayfa | Görsel |
-|---|---|
-| Dashboard | <img width="1919" height="917" alt="image" src="https://github.com/user-attachments/assets/bc4be12a-31c0-4b82-aacf-03eee8a7b597" /> |
-| Ürünler | <img width="1919" height="919" alt="image" src="https://github.com/user-attachments/assets/65ca440e-4b1b-4e7a-86d1-f4fc00091d61" /> <img width="1903" height="915" alt="image" src="https://github.com/user-attachments/assets/1280427a-4845-46ee-a687-ba68d1922854" /> |
-| Kategoriler | <img width="1905" height="920" alt="image" src="https://github.com/user-attachments/assets/849059fd-e9b5-4158-9bc9-0bc771e153d4" /> |
-| Siparişler | <img width="1919" height="856" alt="image" src="https://github.com/user-attachments/assets/85a87ca9-5a48-4515-8233-33072990d21f" /> |
-| Yorumlar | <img width="1919" height="799" alt="Screenshot_14" src="https://github.com/user-attachments/assets/6711b1d2-ed6f-49b7-a1cc-c143ed4f4823" /> |
-| Kullanıcılar | <img width="1919" height="773" alt="Screenshot_1" src="https://github.com/user-attachments/assets/1e4e1c84-54a5-4506-91ac-bdad51d177d8" /> |
+| Sayfa | Görsel | Sayfa | Görsel |
+|---|---|---|---|
+| Dashboard | <img width="360" alt="admin-dashboard" src="https://github.com/user-attachments/assets/bc4be12a-31c0-4b82-aacf-03eee8a7b597" /> | Ürünler | <img width="360" alt="admin-products" src="https://github.com/user-attachments/assets/65ca440e-4b1b-4e7a-86d1-f4fc00091d61" /> |
+| Kategoriler | <img width="360" alt="admin-categories" src="https://github.com/user-attachments/assets/849059fd-e9b5-4158-9bc9-0bc771e153d4" /> | Siparişler | <img width="360" alt="admin-orders" src="https://github.com/user-attachments/assets/85a87ca9-5a48-4515-8233-33072990d21f" /> |
+| Yorumlar | <img width="360" alt="admin-reviews" src="https://github.com/user-attachments/assets/6711b1d2-ed6f-49b7-a1cc-c143ed4f4823" /> | Kullanıcılar | <img width="360" alt="admin-users" src="https://github.com/user-attachments/assets/1e4e1c84-54a5-4506-91ac-bdad51d177d8" /> |
 
 ## API (Özet)
 Base URL: `http://localhost:8000`
