@@ -158,7 +158,6 @@ export default function RegisterForm() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 px-4 py-8">
       <div className="max-w-2xl w-full space-y-8">
-        {/* Header */}
         <div className="text-center">
           <div className="mx-auto h-20 w-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center shadow-lg mb-6">
             <IconUser className="h-10 w-10 text-white" />
@@ -171,10 +170,9 @@ export default function RegisterForm() {
           </p>
         </div>
 
-        {/* Form */}
+
         <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Personal Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
@@ -217,7 +215,6 @@ export default function RegisterForm() {
               </div>
             </div>
 
-            {/* Contact Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
@@ -260,7 +257,6 @@ export default function RegisterForm() {
               </div>
             </div>
 
-            {/* Password Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
@@ -325,7 +321,6 @@ export default function RegisterForm() {
               </div>
             </div>
 
-            {/* Address Information */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium text-gray-900 flex items-center">
                 <IconMapPin className="h-5 w-5 mr-2 text-green-500" />
@@ -380,7 +375,6 @@ export default function RegisterForm() {
               </div>
             </div>
 
-            {/* Favorite Categories */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium text-gray-900 flex items-center">
                 <IconHeart className="h-5 w-5 mr-2 text-green-500" />
@@ -415,14 +409,13 @@ export default function RegisterForm() {
               )}
             </div>
 
-            {/* Error Message */}
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-xl p-4">
                 <p className="text-sm text-red-600">{error}</p>
               </div>
             )}
 
-            {/* Submit Button */}
+
             <button
               type="submit"
               disabled={isLoading}
@@ -439,7 +432,7 @@ export default function RegisterForm() {
             </button>
           </form>
 
-          {/* Links */}
+
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               Zaten hesabınız var mı?{' '}
@@ -453,7 +446,7 @@ export default function RegisterForm() {
           </div>
         </div>
 
-        {/* Footer */}
+
         <div className="text-center">
           <p className="text-xs text-gray-500">
             Kayıt olarak{' '}

@@ -28,7 +28,7 @@ import {
   IconDeviceFloppy,
   IconX
 } from '@tabler/icons-react';
-import { getProductById, updateProduct, Product, getImageUrl } from '@/services/product';
+import { getProductById, updateProductWithForm, Product, getImageUrl } from '@/services/product';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -51,22 +51,23 @@ export default function ProductEditModal({
   const [loading, setLoading] = useState(false);
   const [product, setProduct] = useState<Product | null>(null);
   const [initialLoading, setInitialLoading] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [removedImages, setRemovedImages] = useState<string[]>([]);
 
-  // Modal açıldığında ürün verilerini yükle
   useEffect(() => {
     if (visible && productId) {
       fetchProduct();
     }
   }, [visible, productId]);
 
-  // Ürün verilerini yükle
+
   const fetchProduct = async () => {
     try {
       setInitialLoading(true);
       const data = await getProductById(productId!);
       setProduct(data);
       
-              // Form'u doldur
+
         form.setFieldsValue({
           name: data.name,
           description: data.description,
@@ -93,15 +94,14 @@ export default function ProductEditModal({
     }
   };
 
-  // Form gönderimi
+
   const handleSubmit = async (values: any) => {
     try {
       setLoading(true);
       
-      // Tags'ı array'e çevir
+
       const tags = values.tags.split(',').map((tag: string) => tag.trim()).filter(Boolean);
-      
-      // Specifications'ı object'e çevir
+
       const specifications: Record<string, string> = {};
       values.specifications.forEach((spec: any) => {
         if (spec.key && spec.value) {
@@ -109,10 +109,10 @@ export default function ProductEditModal({
         }
       });
 
-      // Variants'ı temizle
+
       const variants = values.variants.filter((v: any) => v.size || v.color);
 
-      const updateData = {
+      const updateData: any = {
         name: values.name,
         description: values.description,
         category: values.category,
@@ -124,7 +124,15 @@ export default function ProductEditModal({
         variants
       };
 
-      await updateProduct(productId!, updateData);
+      if (removedImages.length > 0) {
+        updateData.removeImages = removedImages;
+      }
+
+      if (selectedFiles.length > 0) {
+        updateData.newImages = selectedFiles;
+      }
+
+      await updateProductWithForm(productId!, updateData);
       message.success('Ürün başarıyla güncellendi');
       onSuccess();
       onCancel();
@@ -135,7 +143,7 @@ export default function ProductEditModal({
     }
   };
 
-  // Modal kapatıldığında form'u temizle
+
   const handleCancel = () => {
     form.resetFields();
     setProduct(null);
@@ -179,7 +187,6 @@ export default function ProductEditModal({
         }}
         >
           <Row gutter={24}>
-            {/* Sol Kolon - Temel Bilgiler */}
             <Col span={16}>
               <Card title="Temel Bilgiler" className="mb-6 border-2 border-gray-200 shadow-sm">
                 <Row gutter={16}>
@@ -277,7 +284,6 @@ export default function ProductEditModal({
                 </Form.Item>
               </Card>
 
-              {/* Specifications */}
               <Card title="Teknik Özellikler" className="mb-6 border-2 border-gray-200 shadow-sm">
                 <Form.List name="specifications">
                   {(fields, { add, remove }) => (
@@ -339,7 +345,6 @@ export default function ProductEditModal({
                 </Form.List>
               </Card>
 
-              {/* Variants */}
               <Card title="Varyantlar" className="border-2 border-gray-200 shadow-sm">
                 <Form.List name="variants">
                   {(fields, { add, remove }) => (
@@ -414,40 +419,48 @@ export default function ProductEditModal({
               </Card>
             </Col>
 
-            {/* Sağ Kolon - Görsel ve Durum */}
             <Col span={8}>
-              <Card title="Görsel" className="mb-6 border-2 border-gray-200 shadow-sm">
+              <Card title="Görseller" className="mb-6 border-2 border-gray-200 shadow-sm">
                 <div className="space-y-4">
-                  {product.images.map((image, index) => (
-                    <div key={index} className="relative">
-                      <img
-                        src={getImageUrl(image)}
-                        alt={`Ürün görseli ${index + 1}`}
-                        className="w-full h-24 object-cover rounded-md border border-gray-200"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = '/placeholder-image.svg';
-                        }}
-                      />
-                      <div className="absolute top-2 right-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs">
-                        {index + 1}
-                      </div>
-                    </div>
-                  ))}
-                  <Upload
-                    name="images"
-                    listType="picture-card"
-                    showUploadList={false}
-                    disabled
-                  >
-                    <div>
-                      <IconUpload size={20} />
-                      <div style={{ marginTop: 8 }}>Görsel Ekle</div>
-                    </div>
-                  </Upload>
-                  <p className="text-xs text-gray-500">
-                    Görsel ekleme özelliği yakında eklenecek
-                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {product.images.map((image, index) => {
+                      const willRemove = removedImages.includes(image);
+                      return (
+                        <div key={index} className={`relative rounded-md overflow-hidden border ${willRemove ? 'border-red-400' : 'border-gray-200'}`}>
+                          <img
+                            src={getImageUrl(image)}
+                            alt={`Ürün görseli ${index + 1}`}
+                            className="w-full h-24 object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = '/placeholder-image.svg';
+                            }}
+                          />
+                          <div className="absolute top-2 right-2 flex gap-2">
+                            <Button size="small" danger onClick={() => {
+                              setRemovedImages((prev) => prev.includes(image) ? prev.filter(i => i !== image) : [...prev, image]);
+                            }}>
+                              {willRemove ? 'Geri Al' : 'Sil'}
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files || []);
+                      setSelectedFiles(files as File[]);
+                    }}
+                    className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  />
+                  {selectedFiles.length > 0 && (
+                    <div className="text-xs text-gray-500">{selectedFiles.length} yeni görsel seçildi</div>
+                  )}
                 </div>
               </Card>
 
@@ -482,7 +495,6 @@ export default function ProductEditModal({
             </Col>
           </Row>
 
-          {/* Form Actions */}
           <Divider />
           <div className="flex justify-end space-x-4">
             <Button

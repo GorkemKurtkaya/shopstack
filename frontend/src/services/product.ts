@@ -137,10 +137,8 @@ export const getProductById = async (id: string): Promise<Product> => {
 // Yeni ürün oluştur
 export const createProduct = async (productData: CreateProductData): Promise<Product> => {
   try {
-    // FormData kullanarak resimleri yükle
     const formData = new FormData();
     
-    // Temel ürün bilgilerini ekle
     formData.append('name', productData.name);
     formData.append('description', productData.description);
     formData.append('category', productData.category);
@@ -151,13 +149,11 @@ export const createProduct = async (productData: CreateProductData): Promise<Pro
     formData.append('specifications', JSON.stringify(productData.specifications));
     formData.append('variants', JSON.stringify(productData.variants));
     
-    // Resimleri ekle
     if (productData.images && productData.images.length > 0) {
       productData.images.forEach((image, index) => {
         if (image instanceof File) {
           formData.append('images', image);
         } else if (typeof image === 'string') {
-          // Eğer resim zaten bir string path ise, onu da ekle
           formData.append('imagePaths', image);
         }
       });
@@ -201,6 +197,60 @@ export const updateProduct = async (id: string, productData: UpdateProductData):
     return await response.json();
   } catch (error) {
     console.error('Ürün güncelleme hatası:', error);
+    throw error;
+  }
+};
+
+// Ürün güncelle (FormData ile - görsel ekle/sil)
+export const updateProductWithForm = async (
+  id: string,
+  productData: UpdateProductData & { removeImages?: string[]; newImages?: File[] }
+): Promise<Product> => {
+  try {
+    const formData = new FormData();
+
+    if (productData.name !== undefined) formData.append('name', String(productData.name));
+    if (productData.description !== undefined) formData.append('description', String(productData.description));
+    if (productData.category !== undefined) formData.append('category', String(productData.category));
+    if (productData.price !== undefined) formData.append('price', String(productData.price));
+    if (productData.stock !== undefined) formData.append('stock', String(productData.stock));
+    if (productData.featured !== undefined) formData.append('featured', String(productData.featured));
+
+    if (productData.tags !== undefined) {
+      const tagsValue = Array.isArray(productData.tags) ? productData.tags.join(',') : String(productData.tags as any);
+      formData.append('tags', tagsValue);
+    }
+
+    if (productData.specifications !== undefined) {
+      formData.append('specifications', JSON.stringify(productData.specifications));
+    }
+
+    if (productData.variants !== undefined) {
+      formData.append('variants', JSON.stringify(productData.variants));
+    }
+
+    if (productData.removeImages && productData.removeImages.length > 0) {
+      formData.append('removeImages', productData.removeImages.join(','));
+    }
+
+    if (productData.newImages && productData.newImages.length > 0) {
+      productData.newImages.forEach((file) => formData.append('images', file));
+    }
+
+    const response = await fetch(`${BASE_URL}/product/admin/products/${id}`, {
+      method: 'PUT',
+      credentials: 'include',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Ürün güncellenirken bir hata oluştu');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Ürün güncelleme (form) hatası:', error);
     throw error;
   }
 };

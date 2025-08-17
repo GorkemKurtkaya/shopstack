@@ -1,4 +1,4 @@
-// Cart service - Sepet işlemleri için API çağrıları
+
 
 export interface CartItem {
   productId: string;
@@ -44,7 +44,7 @@ export const addToCart = async (productId: string, quantity: number = 1): Promis
       headers: {
         'Content-Type': 'application/json',
       },
-      credentials: 'include', // Cookie'leri gönder
+      credentials: 'include',
       body: JSON.stringify({
         product: {
           productId,
@@ -80,7 +80,7 @@ export const getCart = async (): Promise<CartItem[]> => {
   try {
     const response = await fetch(`${API_BASE_URL}/basket/me`, {
       method: 'GET',
-      credentials: 'include', // Cookie'leri gönder
+      credentials: 'include', 
     });
 
     if (response.ok) {
@@ -104,7 +104,7 @@ export const updateCartItem = async (productId: string, action: 'increment' | 'd
       headers: {
         'Content-Type': 'application/json',
       },
-      credentials: 'include', // Cookie'leri gönder
+      credentials: 'include', 
       body: JSON.stringify({
         productId,
         action
@@ -138,7 +138,7 @@ export const clearCart = async (): Promise<{ success: boolean; message: string }
   try {
     const response = await fetch(`${API_BASE_URL}/basket/me`, {
       method: 'DELETE',
-      credentials: 'include', // Cookie'leri gönder
+      credentials: 'include', 
     });
 
     if (response.ok) {

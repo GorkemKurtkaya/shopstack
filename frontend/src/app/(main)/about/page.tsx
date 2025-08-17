@@ -86,7 +86,6 @@ export default function AboutPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-5xl md:text-6xl font-bold mb-6">
@@ -99,7 +98,6 @@ export default function AboutPage() {
         </div>
       </div>
 
-      {/* Stats Section */}
       <div className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -129,7 +127,7 @@ export default function AboutPage() {
         </div>
       </div>
 
-      {/* Mission & Vision Section */}
+
       <div className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Row gutter={[48, 48]} align="middle">
@@ -176,7 +174,7 @@ export default function AboutPage() {
         </div>
       </div>
 
-      {/* Values Section */}
+
       <div className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -208,7 +206,7 @@ export default function AboutPage() {
         </div>
       </div>
 
-      {/* Team Section */}
+
       <div className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

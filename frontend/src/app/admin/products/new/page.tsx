@@ -41,7 +41,7 @@ export default function NewProductPage() {
   const [imageList, setImageList] = useState<any[]>([]);
   const router = useRouter();
 
-  // Kategorileri yükle
+
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -55,15 +55,13 @@ export default function NewProductPage() {
     }
   };
 
-  // Form gönderimi
+
   const handleSubmit = async (values: any) => {
     try {
       setLoading(true);
       
-      // Tags'ı array'e çevir
       const tags = values.tags.split(',').map((tag: string) => tag.trim()).filter(Boolean);
       
-      // Specifications'ı object'e çevir
       const specifications: Record<string, string> = {};
       values.specifications.forEach((spec: any) => {
         if (spec.key && spec.value) {
@@ -71,21 +69,18 @@ export default function NewProductPage() {
         }
       });
 
-      // Variants'ı temizle
       const variants = values.variants.filter((v: any) => v.size || v.color);
 
-      // Resim dosyalarını al
+
       const images = imageList.map(file => {
         if (file.originFileObj) {
-          // Yeni yüklenen dosya
           return file.originFileObj;
         } else if (file.url) {
-          // Mevcut dosya - sadece dosya adını al
           const fileName = file.url.split('/').pop();
           return fileName || file.url;
         }
         return file.name || file;
-      }).filter(Boolean); // Boş değerleri filtrele
+      }).filter(Boolean); 
 
       const productData: CreateProductData = {
         name: values.name,
@@ -111,17 +106,14 @@ export default function NewProductPage() {
     }
   };
 
-  // Resim yükleme işlemi
   const handleImageUpload = (info: any) => {
     let fileList = [...info.fileList];
     
-    // Sadece son 5 resmi kabul et
     fileList = fileList.slice(-5);
     
     setImageList(fileList);
   };
 
-  // Resim kaldırma
   const handleImageRemove = (file: any) => {
     const newList = imageList.filter(item => item.uid !== file.uid);
     setImageList(newList);
@@ -151,7 +143,6 @@ export default function NewProductPage() {
         }}
       >
         <Row gutter={24}>
-          {/* Sol Kolon - Temel Bilgiler */}
           <Col span={16}>
             <Card title="Temel Bilgiler" className="mb-6 border-2 border-gray-200 shadow-sm">
               <Row gutter={16}>
@@ -257,7 +248,7 @@ export default function NewProductPage() {
               </Form.Item>
             </Card>
 
-            {/* Specifications */}
+
             <Card title="Teknik Özellikler" className="mb-6 border-2 border-gray-200 shadow-sm">
               <Form.List name="specifications">
                 {(fields, { add, remove }) => (
@@ -319,7 +310,6 @@ export default function NewProductPage() {
               </Form.List>
             </Card>
 
-            {/* Variants */}
             <Card title="Varyantlar" className="border-2 border-gray-200 shadow-sm">
               <Form.List name="variants">
                 {(fields, { add, remove }) => (
@@ -394,7 +384,6 @@ export default function NewProductPage() {
             </Card>
           </Col>
 
-          {/* Sağ Kolon - Görsel */}
           <Col span={8}>
             <Card title="Ürün Görselleri" className="border-2 border-gray-200 shadow-sm">
               <div className="space-y-4">
@@ -414,7 +403,7 @@ export default function NewProductPage() {
                   onRemove={handleImageRemove}
                   multiple
                   accept="image/*"
-                  beforeUpload={() => false} // Otomatik yüklemeyi engelle
+                  beforeUpload={() => false} 
                   maxCount={5}
                 >
                   {imageList.length < 5 && (
@@ -433,7 +422,7 @@ export default function NewProductPage() {
           </Col>
         </Row>
 
-        {/* Form Actions */}
+
         <Divider />
         <div className="flex justify-end space-x-4">
           <Button

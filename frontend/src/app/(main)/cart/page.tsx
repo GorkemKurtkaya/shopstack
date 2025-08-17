@@ -1,15 +1,15 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { 
-  Card, 
-  Button, 
-  InputNumber, 
-  Space, 
-  Empty, 
-  Spin, 
-  message, 
-  Popconfirm, 
+import {
+  Card,
+  Button,
+  InputNumber,
+  Space,
+  Empty,
+  Spin,
+  message,
+  Popconfirm,
   Divider,
   Row,
   Col,
@@ -21,10 +21,10 @@ import {
   Select,
   Input
 } from 'antd';
-import { 
-  ShoppingCartOutlined, 
-  DeleteOutlined, 
-  PlusOutlined, 
+import {
+  ShoppingCartOutlined,
+  DeleteOutlined,
+  PlusOutlined,
   MinusOutlined,
   ArrowLeftOutlined
 } from '@ant-design/icons';
@@ -85,11 +85,10 @@ export default function CartPage() {
     }
   };
 
-  // Category name'lerini çek
   const fetchCategoryNames = async (categoryIds: string[]) => {
     try {
       const uniqueIds = [...new Set(categoryIds.filter(id => id && !categoryNames[id]))];
-      
+
       if (uniqueIds.length === 0) return;
 
       const categoryPromises = uniqueIds.map(async (id) => {
@@ -117,10 +116,9 @@ export default function CartPage() {
   const loadCart = async () => {
     try {
       setLoading(true);
-      
-      // Önce authentication durumunu kontrol et
+
       const authResult = await checkAuth();
-      
+
       if (!authResult.isAuthenticated) {
         message.error('Bu sayfaya erişmek için giriş yapmanız gerekiyor');
         setTimeout(() => {
@@ -128,10 +126,9 @@ export default function CartPage() {
         }, 3000);
         return;
       }
-      
+
       const items = await getCart();
-      
-      // Her ürün için detayları çek
+
       const itemsWithProducts = await Promise.all(
         items.map(async (item) => {
           try {
@@ -146,11 +143,11 @@ export default function CartPage() {
 
       setCartItems(itemsWithProducts);
 
-      // Category name'lerini çek
+
       const categoryIds = itemsWithProducts
         .map(item => item.product?.category)
         .filter(category => typeof category === 'string') as string[];
-      
+
       if (categoryIds.length > 0) {
         await fetchCategoryNames(categoryIds);
       }
@@ -168,17 +165,16 @@ export default function CartPage() {
 
     try {
       setUpdatingItems(prev => new Set(prev).add(productId));
-      
-      const action = newQuantity > (cartItems.find(item => item.productId === productId)?.quantity || 0) 
-        ? 'increment' 
+
+      const action = newQuantity > (cartItems.find(item => item.productId === productId)?.quantity || 0)
+        ? 'increment'
         : 'decrement';
-      
+
       const result = await updateCartItem(productId, action);
-      
+
       if (result.success) {
-        // Sepeti yeniden yükle
         await loadCart();
-        await updateCartCount(); // Navbar'daki sepet sayısını güncelle
+        await updateCartCount(); 
         message.success('Sepet güncellendi!');
       } else {
         message.error(result.message);
@@ -199,8 +195,7 @@ export default function CartPage() {
   const handleRemoveItem = async (productId: string) => {
     try {
       setUpdatingItems(prev => new Set(prev).add(productId));
-      
-      // Miktarı 0 yaparak kaldır
+
       const currentItem = cartItems.find(item => item.productId === productId);
       if (currentItem) {
         const decrements = currentItem.quantity;
@@ -208,9 +203,9 @@ export default function CartPage() {
           await updateCartItem(productId, 'decrement');
         }
       }
-      
+
       await loadCart();
-      await updateCartCount(); // Navbar'daki sepet sayısını güncelle
+      await updateCartCount(); 
       message.success('Ürün sepetten kaldırıldı!');
     } catch (error) {
       console.error('Remove item error:', error);
@@ -229,10 +224,10 @@ export default function CartPage() {
     try {
       setClearingCart(true);
       const result = await clearCart();
-      
+
       if (result.success) {
         setCartItems([]);
-        await updateCartCount(); // Navbar'daki sepet sayısını güncelle
+        await updateCartCount(); 
         message.success('Sepet temizlendi!');
       } else {
         message.error(result.message);
@@ -245,7 +240,6 @@ export default function CartPage() {
     }
   };
 
-  // Toplam fiyat hesapla
   const totalPrice = cartItems.reduce((total, item) => {
     if (item.product) {
       return total + (item.product.price * item.quantity);
@@ -253,12 +247,10 @@ export default function CartPage() {
     return total;
   }, 0);
 
-  // Toplam ürün sayısı
   const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
 
   // Sipariş oluştur
   const handleCreateOrder = async () => {
-    // Validasyon kontrolleri
     if (!cardInfo) {
       message.error('Lütfen kart bilgilerini girin!');
       return;
@@ -277,13 +269,11 @@ export default function CartPage() {
     try {
       setIsCreatingOrder(true);
 
-      // Sipariş verilerini hazırla
       const orderData: CreateOrderData = {
         orderItems: cartItems.map(item => ({
           product: item.productId,
           quantity: item.quantity,
           price: item.product?.price || 0,
-          // Variant bilgisi varsa ekle
           ...(item.product?.variants && item.product.variants.length > 0 && {
             variant: {
               size: item.product.variants[0]?.size,
@@ -306,19 +296,15 @@ export default function CartPage() {
       };
 
       console.log('Creating order with data:', orderData);
-
-      // Siparişi oluştur
       const order = await createOrder(orderData);
-      
+
       message.success('Siparişiniz başarıyla oluşturuldu!');
-      
-      // Sepeti temizle
+
       await clearCart();
       await updateCartCount();
-      
-      // Sipariş sayfasına yönlendir
+
       router.push(`/orders`);
-      
+
     } catch (error) {
       console.error('Order creation error:', error);
       message.error('Sipariş oluşturulurken hata oluştu!');
@@ -343,13 +329,12 @@ export default function CartPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div className="flex flex-col items-start space-y-3">
               <Link href="/">
-                <Button 
-                  type="text" 
+                <Button
+                  type="text"
                   icon={<ArrowLeftOutlined />}
                   className="text-gray-500 hover:text-blue-600 text-sm font-medium border border-gray-200 hover:border-blue-300 px-3 py-1 rounded-lg transition-all duration-200"
                 >
@@ -361,7 +346,7 @@ export default function CartPage() {
                 Sepetim
               </Title>
             </div>
-            
+
             {cartItems.length > 0 && (
               <Button
                 danger
@@ -373,7 +358,7 @@ export default function CartPage() {
               </Button>
             )}
           </div>
-          
+
           {cartItems.length > 0 && (
             <Text className="text-gray-600 mt-6">
               {totalItems} ürün • Toplam: ₺{totalPrice.toLocaleString('tr-TR')}
@@ -381,7 +366,6 @@ export default function CartPage() {
           )}
         </div>
 
-        {/* Cart Content */}
         {cartItems.length === 0 ? (
           <Card className="text-center py-16">
             <Empty
@@ -397,17 +381,15 @@ export default function CartPage() {
           </Card>
         ) : (
           <Row gutter={[24, 24]}>
-            {/* Cart Items */}
             <Col xs={24} lg={16}>
               <div className="space-y-4">
                 {cartItems.map((item) => (
-                                     <Card 
-                     key={item.productId} 
-                     className="shadow-sm"
-                     styles={{ body: { padding: '16px' } }}
-                   >
+                  <Card
+                    key={item.productId}
+                    className="shadow-sm"
+                    styles={{ body: { padding: '16px' } }}
+                  >
                     <div className="flex items-start space-x-4">
-                      {/* Product Image */}
                       <div className="flex-shrink-0">
                         <Image
                           src={item.product?.images?.[0] ? getImageUrl(item.product.images[0]) : '/placeholder.png'}
@@ -419,23 +401,23 @@ export default function CartPage() {
                         />
                       </div>
 
-                      {/* Product Info */}
+
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between">
                           <div className="flex-1 min-w-0">
                             <Title level={5} className="mb-2 line-clamp-2">
                               {item.product?.name || 'Ürün bulunamadı'}
                             </Title>
-                            
+
                             {item.product?.category && (
                               <Tag color="blue" className="mb-2">
-                                {typeof item.product.category === 'object' 
-                                  ? item.product.category.name 
+                                {typeof item.product.category === 'object'
+                                  ? item.product.category.name
                                   : categoryNames[item.product.category] || 'Kategori Yükleniyor...'
                                 }
                               </Tag>
                             )}
-                            
+
                             <div className="flex items-center space-x-4">
                               <Text className="text-lg font-semibold text-blue-600">
                                 ₺{item.product?.price?.toLocaleString('tr-TR') || '0'}
@@ -443,7 +425,7 @@ export default function CartPage() {
                             </div>
                           </div>
 
-                          {/* Quantity Controls */}
+
                           <div className="flex flex-col items-end space-y-2">
                             <Space>
                               <Button
@@ -453,7 +435,7 @@ export default function CartPage() {
                                 disabled={item.quantity <= 1 || updatingItems.has(item.productId)}
                                 loading={updatingItems.has(item.productId)}
                               />
-                              
+
                               <InputNumber
                                 min={1}
                                 max={item.product?.stock || 999}
@@ -462,7 +444,7 @@ export default function CartPage() {
                                 disabled={updatingItems.has(item.productId)}
                                 className="w-16 text-center"
                               />
-                              
+
                               <Button
                                 size="small"
                                 icon={<PlusOutlined />}
@@ -486,7 +468,6 @@ export default function CartPage() {
                           </div>
                         </div>
 
-                        {/* Item Total */}
                         <div className="mt-3 pt-3 border-t border-gray-100">
                           <div className="flex justify-between items-center">
                             <Text className="text-gray-600">
@@ -504,11 +485,9 @@ export default function CartPage() {
               </div>
             </Col>
 
-                         {/* Order Summary */}
-             <Col xs={24} lg={8}>
-               <Card title="Sipariş Özeti" className="sticky top-0">
+            <Col xs={24} lg={8}>
+              <Card title="Sipariş Özeti" className="sticky top-0">
                 <div className="space-y-4">
-                  {/* Summary Items */}
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <Text>Ürünler ({totalItems})</Text>
@@ -522,7 +501,6 @@ export default function CartPage() {
 
                   <Divider />
 
-                  {/* Total */}
                   <div className="flex justify-between items-center">
                     <Title level={4} className="mb-0">Toplam</Title>
                     <Title level={3} className="mb-0 text-blue-600">
@@ -530,10 +508,9 @@ export default function CartPage() {
                     </Title>
                   </div>
 
-                  {/* Checkout Button */}
-                  <Button 
-                    type="primary" 
-                    size="large" 
+                  <Button
+                    type="primary"
+                    size="large"
                     className="w-full h-12 text-lg"
                     disabled={cartItems.length === 0 || !cardInfo || !selectedAddress}
                     loading={isCreatingOrder}
@@ -542,7 +519,6 @@ export default function CartPage() {
                     {isCreatingOrder ? 'Sipariş Oluşturuluyor...' : 'Siparişi Tamamla'}
                   </Button>
 
-                  {/* Bilgi Mesajı */}
                   {(!cardInfo || !selectedAddress) && (
                     <div className="text-xs text-gray-500 text-center mt-2">
                       {!cardInfo && !selectedAddress && 'Siparişi tamamlamak için kart bilgileri ve adres seçimi gerekli'}
@@ -553,68 +529,65 @@ export default function CartPage() {
 
                   <Divider />
 
-                  {/* Ödeme Bilgileri */}
+
                   <div className="space-y-4">
                     <Title level={5} className="mb-3 text-gray-800">
                       💳 Ödeme Bilgileri
                     </Title>
-                    
-                                      {/* Kart Bilgileri */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-                          <span className="text-white text-xs">1</span>
-                        </div>
-                        <span className="text-sm font-medium text-gray-700">Kart Bilgileri</span>
-                      </div>
-                      <Button 
-                        type="text" 
-                        size="small"
-                        onClick={() => setIsCardModalVisible(true)}
-                        className="text-blue-600 hover:text-blue-700"
-                      >
-                        Kart Ekle/Düzenle
-                      </Button>
-                    </div>
-                    
-                    {cardInfo ? (
-                      <div className="bg-green-50 p-3 rounded-lg border border-green-200">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Kart Numarası</span>
-                          <span className="text-sm font-mono text-green-800">
-                            **** **** **** {cardInfo.cardNumber.slice(-4)}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between mt-2">
-                          <span className="text-sm text-gray-600">Son Kullanma</span>
-                          <span className="text-sm font-mono text-green-800">{cardInfo.expiryDate}</span>
-                        </div>
-                        <div className="flex items-center justify-between mt-2">
-                          <span className="text-sm text-gray-600">Kart Sahibi</span>
-                          <span className="text-sm font-medium text-green-800">{cardInfo.cardHolder}</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                        <div className="text-center text-gray-500 text-sm">
-                          Henüz kart bilgileri girilmedi
-                        </div>
-                      </div>
-                    )}
-                  </div>
 
-                    {/* Onay */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                            <span className="text-white text-xs">1</span>
+                          </div>
+                          <span className="text-sm font-medium text-gray-700">Kart Bilgileri</span>
+                        </div>
+                        <Button
+                          type="text"
+                          size="small"
+                          onClick={() => setIsCardModalVisible(true)}
+                          className="text-blue-600 hover:text-blue-700"
+                        >
+                          Kart Ekle/Düzenle
+                        </Button>
+                      </div>
+
+                      {cardInfo ? (
+                        <div className="bg-green-50 p-3 rounded-lg border border-green-200">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Kart Numarası</span>
+                            <span className="text-sm font-mono text-green-800">
+                              **** **** **** {cardInfo.cardNumber.slice(-4)}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between mt-2">
+                            <span className="text-sm text-gray-600">Son Kullanma</span>
+                            <span className="text-sm font-mono text-green-800">{cardInfo.expiryDate}</span>
+                          </div>
+                          <div className="flex items-center justify-between mt-2">
+                            <span className="text-sm text-gray-600">Kart Sahibi</span>
+                            <span className="text-sm font-medium text-green-800">{cardInfo.cardHolder}</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                          <div className="text-center text-gray-500 text-sm">
+                            Henüz kart bilgileri girilmedi
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
                     <div className="space-y-3">
                       <div className="flex items-center space-x-2">
-                        <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
-                          cardInfo ? 'bg-green-500' : 'bg-gray-400'
-                        }`}>
+                        <div className={`w-4 h-4 rounded-full flex items-center justify-center ${cardInfo ? 'bg-green-500' : 'bg-gray-400'
+                          }`}>
                           <span className="text-white text-xs">2</span>
                         </div>
                         <span className="text-sm font-medium text-gray-700">Kart Onaylandı</span>
                       </div>
-                      
+
                       {cardInfo ? (
                         <div className="bg-green-50 p-3 rounded-lg border border-green-200">
                           <div className="flex items-center space-x-2">
@@ -631,7 +604,6 @@ export default function CartPage() {
                       )}
                     </div>
 
-                    {/* Adres Seçimi */}
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
@@ -640,8 +612,8 @@ export default function CartPage() {
                           </div>
                           <span className="text-sm font-medium text-gray-700">Teslimat Adresi</span>
                         </div>
-                        <Button 
-                          type="text" 
+                        <Button
+                          type="text"
                           size="small"
                           onClick={() => setIsAddressModalVisible(true)}
                           className="text-orange-600 hover:text-orange-700"
@@ -649,7 +621,7 @@ export default function CartPage() {
                           Adres Seç
                         </Button>
                       </div>
-                      
+
                       {selectedAddress ? (
                         <div className="bg-orange-50 p-3 rounded-lg border border-orange-200">
                           <div className="space-y-1">
@@ -678,7 +650,6 @@ export default function CartPage() {
           </Row>
         )}
 
-        {/* Kart Bilgileri Modal */}
         <Modal
           title="💳 Kart Bilgileri"
           open={isCardModalVisible}
@@ -700,12 +671,27 @@ export default function CartPage() {
             <Form.Item
               name="cardNumber"
               label="Kart Numarası"
-              rules={[{ required: true, message: 'Kart numarası gerekli!' }]}
+              rules={[
+                { required: true, message: 'Kart numarası gerekli!' },
+                {
+                  validator: (_, value) => {
+                    const digits = String(value || '').replace(/\D/g, '');
+                    return digits.length === 16
+                      ? Promise.resolve()
+                      : Promise.reject('Kart numarası 16 haneli olmalıdır');
+                  }
+                }
+              ]}
             >
               <Input
                 placeholder="1234 5678 9012 3456"
                 maxLength={19}
                 className="font-mono"
+                onChange={(e) => {
+                  const raw = e.target.value.replace(/\D/g, '').slice(0, 16);
+                  const grouped = raw.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+                  cardForm.setFieldsValue({ cardNumber: grouped });
+                }}
               />
             </Form.Item>
 
@@ -731,6 +717,11 @@ export default function CartPage() {
                     placeholder="MM/YY"
                     maxLength={5}
                     className="font-mono"
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(/\D/g, '').slice(0, 4);
+                      const formatted = raw.length > 2 ? `${raw.slice(0, 2)}/${raw.slice(2)}` : raw;
+                      cardForm.setFieldsValue({ expiryDate: formatted });
+                    }}
                   />
                 </Form.Item>
               </Col>
@@ -762,7 +753,6 @@ export default function CartPage() {
           </Form>
         </Modal>
 
-        {/* Adres Seçimi Modal */}
         <Modal
           title="📍 Teslimat Adresi Seç"
           open={isAddressModalVisible}
@@ -776,11 +766,10 @@ export default function CartPage() {
               {user.addresses.map((address) => (
                 <div
                   key={address._id}
-                  className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
-                    selectedAddress?._id === address._id
+                  className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${selectedAddress?._id === address._id
                       ? 'border-orange-500 bg-orange-50'
                       : 'border-gray-200 bg-white hover:border-orange-300 hover:bg-orange-50'
-                  }`}
+                    }`}
                   onClick={() => {
                     setSelectedAddress(address);
                     setIsAddressModalVisible(false);

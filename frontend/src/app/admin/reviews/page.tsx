@@ -49,14 +49,12 @@ export default function ReviewsPage() {
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterRating, setFilterRating] = useState('all');
 
-  // Yorumları yükle - useCallback ile optimize edildi
   const fetchReviews = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getAllReviews();
       setReviews(data);
       
-      // Kullanıcı bilgilerini çek - sadece yeni kullanıcılar için
       const newUserIds = data.filter(review => 
         review.user?._id && !users[review.user._id]
       ).map(review => review.user._id);
@@ -93,7 +91,6 @@ export default function ReviewsPage() {
     fetchReviews();
   }, [fetchReviews]);
 
-  // Yorum onayla - useCallback ile optimize edildi
   const handleApprove = useCallback(async (reviewId: string) => {
     try {
       await approveReview(reviewId);
@@ -104,7 +101,6 @@ export default function ReviewsPage() {
     }
   }, [fetchReviews]);
 
-  // Yorum sil - useCallback ile optimize edildi
   const handleDelete = useCallback(async (reviewId: string) => {
     try {
       await deleteReview(reviewId);
@@ -115,10 +111,8 @@ export default function ReviewsPage() {
     }
   }, [fetchReviews]);
 
-  // Filtrelenmiş yorumlar - useMemo ile optimize edildi
   const filteredReviews = useMemo(() => {
     return reviews.filter(review => {
-      // Güvenli kontroller
       const user = users[review.user?._id || ''] || review.user;
       const userName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : '';
       const productName = review.product?.name || '';
@@ -140,7 +134,6 @@ export default function ReviewsPage() {
     });
   }, [reviews, users, searchText, filterStatus, filterRating]);
 
-  // İstatistikler - useMemo ile optimize edildi
   const stats = useMemo(() => ({
     total: reviews.length,
     approved: reviews.filter(r => r.approved).length,
@@ -150,7 +143,6 @@ export default function ReviewsPage() {
       : '0.0'
   }), [reviews]);
 
-  // Tablo kolonları - useMemo ile optimize edildi
   const columns = useMemo(() => [
     {
       title: 'Kullanıcı',
@@ -301,7 +293,6 @@ export default function ReviewsPage() {
     },
   ], [users, handleApprove, handleDelete]);
 
-  // Search ve filter handler'ları - useCallback ile optimize edildi
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchText(e.target.value);
   }, []);
@@ -316,7 +307,6 @@ export default function ReviewsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <Title level={2} className="mb-0">Yorum Yönetimi</Title>
         <Button
@@ -328,7 +318,6 @@ export default function ReviewsPage() {
         </Button>
       </div>
 
-      {/* İstatistikler */}
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={12} md={6}>
           <Card className="shadow-lg border-2 border-gray-100 bg-gradient-to-br from-white to-gray-50">
@@ -372,7 +361,6 @@ export default function ReviewsPage() {
         </Col>
       </Row>
 
-      {/* Filtreler */}
       <Card className="shadow-lg border-2 border-gray-100 bg-gradient-to-br from-white to-gray-50">
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
           <div className="w-full sm:w-auto">
@@ -417,7 +405,6 @@ export default function ReviewsPage() {
         </div>
       </Card>
 
-      {/* Yorum Tablosu */}
       <Card className="shadow-lg border-2 border-gray-100 bg-gradient-to-br from-white to-gray-50">
         <div className="overflow-x-auto">
           <Table

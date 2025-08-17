@@ -2,7 +2,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 // Types
 export interface Address {
-  _id?: string; // Backend'den gelen ObjectId
+  _id?: string; 
   street: string;
   city: string;
   state: string;
@@ -27,7 +27,7 @@ export interface LoginData {
 }
 
 export interface User {
-  id: string; // Backend'de 'id' olarak geliyor
+  id: string; 
   firstName: string;
   lastName: string;
   email: string;
@@ -70,7 +70,7 @@ export interface AuthResponse {
   message: string;
   user?: User;
   token?: string;
-  addresses?: Address[]; // Adres güncelleme için
+  addresses?: Address[]; 
 }
 
 export interface CheckAuthResponse {
@@ -92,7 +92,6 @@ export const register = async (data: RegisterData): Promise<AuthResponse> => {
     const result = await response.json();
 
     if (!response.ok) {
-      // Backend validation error handling
       if (result.errors && Array.isArray(result.errors)) {
         const errorMessage = result.errors[0]?.msg || 'Kayıt işlemi başarısız oldu';
         return { success: false, message: errorMessage };
@@ -122,7 +121,6 @@ export const login = async (data: LoginData): Promise<AuthResponse> => {
     const result = await response.json();
 
     if (!response.ok) {
-      // Backend validation error handling
       if (result.errors && Array.isArray(result.errors)) {
         const errorMessage = result.errors[0]?.msg || 'Giriş bilgileri hatalı';
         return { success: false, message: errorMessage };
@@ -173,7 +171,6 @@ export const getCurrentUser = async (): Promise<User | null> => {
     }
 
     const result = await response.json();
-    // Backend'den direkt user objesi geliyor, .user property'si yok
     return result;
   } catch (error) {
     console.error('Get current user error:', error);
@@ -303,7 +300,7 @@ export const resetPassword = async (data: ResetPasswordData): Promise<AuthRespon
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ token: data.token, password: data.newPassword }),
     });
 
     const result = await response.json();

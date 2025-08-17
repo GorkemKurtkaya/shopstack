@@ -1,13 +1,14 @@
 "use client";
 
-import { Card, Button, Rate, Tag, Carousel, message, notification } from 'antd';
+import { Card, Button, Rate, Tag, Carousel, notification } from 'antd';
 import React from 'react';
-import { ShoppingCartOutlined, EyeOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
+import { ShoppingCartOutlined, EyeOutlined } from '@ant-design/icons';
 import Image from 'next/image';
 import { Product, getImageUrl } from '@/services/product';
 import { addToCart } from '@/services/cart';
 import { useCart } from '@/contexts/CartContext';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 const { Meta } = Card;
 
@@ -18,14 +19,14 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const { incrementCartCount, isAuthenticated } = useCart();
   const [api, contextHolder] = notification.useNotification();
+  const router = useRouter();
   
-  // Görselleri kontrol et
   const hasMultipleImages = product.images && product.images.length > 1;
   const images = product.images && product.images.length > 0 ? product.images : [];
 
-  // Sepete ekleme fonksiyonu
-  const handleAddToCart = async () => {
-    // Authentication kontrolü
+
+  const handleAddToCart = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     if (!isAuthenticated) {
       api.warning({
         message: 'Giriş Gerekli',
@@ -40,53 +41,38 @@ export default function ProductCard({ product }: ProductCardProps) {
       const result = await addToCart(product._id, 1);
       
       if (result.success) {
-        message.success(result.message);
-        incrementCartCount(1); // Sepet sayısını anlık güncelle
+        api.success({ message: result.message, placement: 'bottomLeft' });
+        incrementCartCount(1); 
       } else {
-        message.error(result.message);
+        api.error({ message: result.message, placement: 'bottomLeft' });
       }
     } catch (error) {
       console.error('Add to cart error:', error);
-      message.error('Ürün sepete eklenirken hata oluştu');
+      api.error({ message: 'Ürün sepete eklenirken hata oluştu', placement: 'bottomLeft' });
     }
   };
 
-  // Rating'i 0-5 arasında sınırla
   const rating = Math.min(Math.max(product.averageRating || 0, 0), 5);
 
-  // Stok durumuna göre tag göster
   const stockStatus = product.stock > 0 ? 'green' : 'red';
   const stockText = product.stock > 0 ? 'Stokta' : 'Stok Yok';
 
-  // Carousel için özel arrow'lar - ürünün altında
-  const CustomArrow = ({ type, onClick }: { type: 'prev' | 'next'; onClick?: () => void }) => (
-    <button
-      onClick={onClick}
-      className={`absolute top-1/2 transform -translate-y-1/2 z-10 w-6 h-6 bg-white bg-opacity-90 hover:bg-opacity-100 text-gray-700 hover:text-blue-600 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm hover:shadow-md ${
-        type === 'prev' ? 'left-1' : 'right-1'
-      }`}
-    >
-      {type === 'prev' ? <LeftOutlined className="text-xs" /> : <RightOutlined className="text-xs" />}
-    </button>
-  );
+  
 
   return (
     <>
       {contextHolder}
       <Card
         hoverable
-        className="product-card group"
+        className="product-card group cursor-pointer"
+        onClick={() => router.push(`/products/${product._id}`)}
       cover={
         <div className="relative overflow-hidden bg-gray-50">
           {hasMultipleImages ? (
-            // Birden çok görsel varsa carousel
             <Carousel
               autoplay={true}
               autoplaySpeed={5000}
               dots={false}
-              arrows={true}
-              prevArrow={<CustomArrow type="prev" />}
-              nextArrow={<CustomArrow type="next" />}
               className="product-carousel"
             >
               {images.map((image, index) => (
@@ -102,7 +88,6 @@ export default function ProductCard({ product }: ProductCardProps) {
               ))}
             </Carousel>
           ) : (
-            // Tek görsel varsa normal gösterim
             <div className="flex items-center justify-center h-48">
               <Image
                 src={getImageUrl(images[0] || '')}
@@ -122,20 +107,19 @@ export default function ProductCard({ product }: ProductCardProps) {
           icon={<ShoppingCartOutlined />}
           className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 transition-all duration-200 h-10 px-4 rounded-lg"
           disabled={product.stock <= 0}
-          onClick={handleAddToCart}
+          onClick={(e) => handleAddToCart(e)}
         >
           {product.stock > 0 ? 'Sepete Ekle' : 'Stok Yok'}
         </Button>,
-        <Link href={`/products/${product._id}`}>
-          <Button
-            key="view"
-            type="text"
-            icon={<EyeOutlined />}
-            className="text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition-all duration-200 h-10 px-4 rounded-lg"
-          >
-            Görüntüle
-          </Button>
-        </Link>
+        <Button
+          key="view"
+          type="text"
+          icon={<EyeOutlined />}
+          className="text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition-all duration-200 h-10 px-4 rounded-lg"
+          onClick={(e) => { e.stopPropagation(); router.push(`/products/${product._id}`); }}
+        >
+          Görüntüle
+        </Button>
       ]}
     >
       <Meta
@@ -148,7 +132,6 @@ export default function ProductCard({ product }: ProductCardProps) {
         }
         description={
           <div className="space-y-3">
-            {/* Rating */}
             <div className="flex items-center space-x-2">
               <Rate disabled defaultValue={rating} className="text-sm" />
               <span className="text-gray-500 text-sm">
@@ -156,28 +139,23 @@ export default function ProductCard({ product }: ProductCardProps) {
               </span>
             </div>
             
-            {/* Fiyat */}
             <div className="flex items-center space-x-3">
               <span className="text-2xl font-bold text-blue-600 group-hover:text-blue-700 transition-colors duration-200">
                 ₺{product.price.toLocaleString('tr-TR')}
               </span>
             </div>
             
-            {/* Kategori */}
             {product.category && typeof product.category === 'object' && 'name' in product.category && (
               <div className="text-sm text-gray-500">
                 {product.category.name}
               </div>
             )}
             
-            {/* Stok bilgisi */}
             <div className="text-sm text-gray-500">
               Stok: {product.stock} adet
             </div>
             
-            {/* Tag'ler - Kategorinin altında */}
             <div className="flex flex-wrap gap-2 pt-2">
-              {/* Stok durumu tag'i */}
               <Tag 
                 color={stockStatus} 
                 className="text-xs font-medium"
@@ -185,7 +163,6 @@ export default function ProductCard({ product }: ProductCardProps) {
                 {stockText}
               </Tag>
               
-              {/* Featured tag */}
               {product.featured && (
                 <Tag color="blue" className="text-xs font-medium">
                   Öne Çıkan

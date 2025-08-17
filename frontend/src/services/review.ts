@@ -139,7 +139,6 @@ export const checkUserReview = async (productId: string): Promise<Review | null>
     });
     
     if (response.status === 404) {
-      // Kullanıcı bu ürün için yorum yapmamış
       return null;
     }
     

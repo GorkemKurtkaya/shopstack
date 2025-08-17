@@ -23,7 +23,7 @@ import {
   Avatar,
   List
 } from 'antd';
-import {
+import { 
   ShoppingCartOutlined,
   EyeOutlined,
   LeftOutlined,
@@ -36,6 +36,8 @@ import {
 import { getProductById, Product, getImageUrl } from '@/services/product';
 import { addToCart } from '@/services/cart';
 import { getProductReviews, createReview, CreateReviewData, checkUserReview, Review } from '@/services/review';
+import { getCurrentUser } from '@/services/auth';
+import { getUserOrders } from '@/services/orders';
 import { getCategoryById, Category } from '@/services/category';
 import { useCart } from '@/contexts/CartContext';
 import Link from 'next/link';
@@ -57,13 +59,15 @@ export default function ProductDetailPage() {
   const [userReview, setUserReview] = useState<Review | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [category, setCategory] = useState<Category | null>(null);
+  const [hasPurchased, setHasPurchased] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
 
   const { incrementCartCount, isAuthenticated } = useCart();
+  const [api, contextHolder] = notification.useNotification();
   const router = useRouter();
   const params = useParams();
   const productId = params.id as string;
-  const [api, contextHolder] = notification.useNotification();
+  
 
   useEffect(() => {
     if (productId) {
@@ -78,7 +82,6 @@ export default function ProductDetailPage() {
       const productData = await getProductById(productId);
       setProduct(productData);
 
-      // Kategori bilgisini yükle
       if (productData.category && typeof productData.category === 'string') {
         try {
           const categoryData = await getCategoryById(productData.category);
@@ -88,7 +91,6 @@ export default function ProductDetailPage() {
         }
       }
 
-      // Kullanıcının bu ürün için yorum yapıp yapmadığını kontrol et
       if (isAuthenticated) {
         try {
           const userReviewData = await checkUserReview(productId);
@@ -96,6 +98,24 @@ export default function ProductDetailPage() {
         } catch (error) {
           console.error('User review check error:', error);
         }
+
+        try {
+          const me = await getCurrentUser();
+          if (me?.id) {
+            const orders = await getUserOrders(me.id);
+            const purchased = orders.some(order => 
+              order.status === 'delivered' && order.orderItems.some(item => item.product === productId)
+            );
+            setHasPurchased(purchased);
+          } else {
+            setHasPurchased(false);
+          }
+        } catch (error) {
+          console.error('Purchase check error:', error);
+          setHasPurchased(false);
+        }
+      } else {
+        setHasPurchased(false);
       }
     } catch (error) {
       console.error('Product load error:', error);
@@ -119,7 +139,6 @@ export default function ProductDetailPage() {
   };
 
   const handleAddToCart = async () => {
-    // Authentication kontrolü
     if (!isAuthenticated) {
       api.warning({
         message: 'Giriş Gerekli',
@@ -167,10 +186,8 @@ export default function ProductDetailPage() {
 
       const newReview = await createReview(reviewData);
 
-      // Yorumları yeniden yükle
       await loadReviews();
 
-      // Kullanıcının yorumunu güncelle
       setUserReview(newReview);
 
       message.success('Yorumunuz başarıyla gönderildi!');
@@ -184,7 +201,6 @@ export default function ProductDetailPage() {
     }
   };
 
-  // Carousel için özel arrow'lar
   const CustomArrow = ({ type, onClick }: { type: 'prev' | 'next'; onClick?: () => void }) => (
     <button
       onClick={onClick}
@@ -225,7 +241,6 @@ export default function ProductDetailPage() {
       {contextHolder}
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
           <div className="mb-8">
             <div className="flex items-center space-x-4">
               <Link href="/products">
@@ -240,7 +255,6 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          {/* Product Details */}
           <Row gutter={[48, 24]}>
             <Col xs={24} lg={12}>
               <Card className="shadow-lg border-0 rounded-xl">
@@ -251,34 +265,35 @@ export default function ProductDetailPage() {
                     arrows={true}
                     prevArrow={<CustomArrow type="prev" />}
                     nextArrow={<CustomArrow type="next" />}
-                    className="product-detail-carousel"
+                    className="product-detail-carousel relative"
                     afterChange={(current) => setSelectedImageIndex(current)}
                   >
                     {images.map((image, index) => (
-                      <div key={index} className="flex items-center justify-center h-96 overflow-hidden">
+                      <div key={index} className="flex items-center justify-center h-96 w-full overflow-hidden ml-20">
                         <Image
                           src={getImageUrl(image)}
                           alt={`${product.name} - Görsel ${index + 1}`}
                           width={400}
                           height={400}
-                          className="max-w-full max-h-full object-contain"
+                          className="w-full h-full object-contain mx-auto"
+                          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                         />
                       </div>
                     ))}
                   </Carousel>
                 ) : (
-                                     <div className="flex items-center justify-center h-96 overflow-hidden">
-                     <Image
-                       src={getImageUrl(images[0] || '')}
-                       alt={product.name}
-                       width={400}
-                       height={400}
-                       className="max-w-full max-h-full object-contain"
-                     />
-                   </div>
+                  <div className="flex items-center justify-center h-96 w-full overflow-hidden ml-20">
+                    <Image
+                      src={getImageUrl(images[0] || '')}
+                      alt={product.name}
+                      width={400}
+                      height={400}
+                      className="w-full h-full object-contain mx-auto"
+                      style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                    />
+                  </div>
                 )}
 
-                {/* Küçük Görsel Thumbnails */}
                 {hasMultipleImages && (
                   <div className="flex justify-center space-x-2 mt-4">
                     {images.map((image, index) => (
@@ -309,11 +324,9 @@ export default function ProductDetailPage() {
               </Card>
             </Col>
 
-            {/* Sağ Kolon - Ürün Bilgileri */}
             <Col xs={24} lg={12}>
               <Card className="shadow-lg border-0 rounded-xl h-fit">
                 <div className="space-y-6">
-                  {/* Ürün Adı */}
                   <div>
                     <Title level={2} className="mb-2 text-gray-900">
                       {product.name}
@@ -330,14 +343,12 @@ export default function ProductDetailPage() {
                     </div>
                   </div>
 
-                  {/* Fiyat */}
                   <div className="bg-blue-50 p-4 rounded-lg">
                     <Text className="text-3xl font-bold text-blue-600">
                       ₺{product.price.toLocaleString('tr-TR')}
                     </Text>
                   </div>
 
-                  {/* Kategori */}
                   {(product.category || category) && (
                     <div>
                       <Text className="text-gray-600 text-sm">Kategori:</Text>
@@ -352,7 +363,6 @@ export default function ProductDetailPage() {
                     </div>
                   )}
 
-                  {/* Stok Durumu */}
                   <div className="flex items-center space-x-3">
                     <Text className="text-gray-600">Stok:</Text>
                     <Tag color={product.stock > 0 ? 'green' : 'red'}>
@@ -360,14 +370,12 @@ export default function ProductDetailPage() {
                     </Tag>
                   </div>
 
-                  {/* Öne Çıkan */}
                   {product.featured && (
                     <Tag color="gold" icon={<StarOutlined />}>
                       Öne Çıkan Ürün
                     </Tag>
                   )}
 
-                  {/* Açıklama */}
                   <div>
                     <Text className="text-gray-600 text-sm">Açıklama:</Text>
                     <div className="mt-2">
@@ -396,7 +404,6 @@ export default function ProductDetailPage() {
                     </div>
                   </div>
 
-                  {/* Miktar Seçimi */}
                   <div>
                     <Text className="text-gray-600 text-sm">Miktar:</Text>
                     <div className="flex items-center space-x-3 mt-2">
@@ -414,7 +421,6 @@ export default function ProductDetailPage() {
                     </div>
                   </div>
 
-                  {/* Sepete Ekle Butonu */}
                   <Button
                     type="primary"
                     size="large"
@@ -426,7 +432,6 @@ export default function ProductDetailPage() {
                     {product.stock > 0 ? 'Sepete Ekle' : 'Stok Yok'}
                   </Button>
 
-                  {/* Özellikler */}
                   {product.specifications && Object.keys(product.specifications).length > 0 && (
                     <div>
                       <Text className="text-gray-600 text-sm">Özellikler:</Text>
@@ -441,7 +446,6 @@ export default function ProductDetailPage() {
                     </div>
                   )}
 
-                  {/* Etiketler */}
                   {product.tags && product.tags.length > 0 && (
                     <div>
                       <Text className="text-gray-600 text-sm">Etiketler:</Text>
@@ -459,7 +463,6 @@ export default function ProductDetailPage() {
             </Col>
           </Row>
 
-          {/* Yorumlar Bölümü */}
           <div className="mt-16">
             <Card title="💬 Ürün Yorumları" className="shadow-lg border-0 rounded-xl">
               <div className="mb-6">
@@ -474,8 +477,7 @@ export default function ProductDetailPage() {
                     </Text>
                   </div>
 
-                  {/* Yorum Yap Butonu */}
-                  {isAuthenticated && !userReview && (
+                  {isAuthenticated && hasPurchased && !userReview && (
                     <Button
                       type="primary"
                       icon={<StarOutlined />}
@@ -485,7 +487,7 @@ export default function ProductDetailPage() {
                     </Button>
                   )}
 
-                  {/* Kullanıcının yorumu varsa göster */}
+
                   {isAuthenticated && userReview && (
                     <Tag color="green" icon={<StarOutlined />}>
                       Yorumunuz: {userReview.rating}⭐
@@ -531,7 +533,6 @@ export default function ProductDetailPage() {
           </div>
         </div>
 
-        {/* Yorum Yapma Modal */}
         <Modal
           title={
             <div className="flex items-center space-x-3">

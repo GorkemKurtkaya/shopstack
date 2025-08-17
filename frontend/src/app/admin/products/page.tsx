@@ -54,13 +54,12 @@ export default function ProductsPage() {
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const router = useRouter();
 
-  // Ürünleri yükle
+
   const fetchProducts = async () => {
     try {
       setLoading(true);
       const data = await getAllProducts();
       
-      // API'den gelen paginated response'u işle
       if (data && Array.isArray(data.items)) {
         setProducts(data.items);
         setPagination(prev => ({ 
@@ -77,7 +76,7 @@ export default function ProductsPage() {
     } catch (error) {
       console.error('Fetch products error:', error);
       message.error('Ürünler yüklenirken bir hata oluştu');
-      setProducts([]); // Hata durumunda boş array set et
+      setProducts([]); 
     } finally {
       setLoading(false);
     }
@@ -85,9 +84,9 @@ export default function ProductsPage() {
 
   useEffect(() => {
     fetchProducts();
-  }, []); // fetchProducts fonksiyonu component içinde tanımlandığı için dependency'e eklenmedi
+  }, []); 
 
-  // Ürün sil
+
   const handleDelete = async (id: string) => {
     try {
       await deleteProduct(id);
@@ -98,7 +97,7 @@ export default function ProductsPage() {
     }
   };
 
-  // Featured durumunu güncelle
+
   const handleFeaturedChange = async (id: string, featured: boolean) => {
     try {
       await updateProductStatus(id, { featured });
@@ -109,9 +108,8 @@ export default function ProductsPage() {
     }
   };
 
-  // Filtreleme ve arama - Güvenli versiyon
+
   const filteredProducts = Array.isArray(products) ? products.filter(product => {
-    // product nesnesinin gerekli propertylerinin var olduğunu kontrol et
     if (!product || typeof product !== 'object') return false;
     
     const productName = product.name || '';
@@ -131,7 +129,7 @@ export default function ProductsPage() {
     return matchesSearch && matchesFeatured;
   }) : [];
 
-  // Tablo sütunları
+
   const columns = [
     {
       title: 'Ürün',
@@ -272,7 +270,7 @@ export default function ProductsPage() {
     },
   ];
 
-  // İstatistikler - Güvenli versiyon
+
   const stats = {
     total: Array.isArray(products) ? products.length : 0,
     featured: Array.isArray(products) ? products.filter(p => p?.featured).length : 0,
@@ -295,7 +293,6 @@ export default function ProductsPage() {
         </Button>
       </div>
 
-      {/* İstatistikler */}
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={12} md={6}>
           <Card className="shadow-lg border-2 border-gray-100 bg-gradient-to-br from-white to-gray-50">
@@ -340,7 +337,6 @@ export default function ProductsPage() {
         </Col>
       </Row>
 
-      {/* Filtreler */}
       <Card className="shadow-lg border-2 border-gray-100 bg-gradient-to-br from-white to-gray-50">
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
           <div className="w-full sm:w-auto">
@@ -378,7 +374,6 @@ export default function ProductsPage() {
         </div>
       </Card>
 
-      {/* Ürün Tablosu */}
       <Card className="shadow-lg border-2 border-gray-100 bg-gradient-to-br from-white to-gray-50">
         <div className="overflow-x-auto">
           <Table
@@ -411,7 +406,6 @@ export default function ProductsPage() {
         </div>
       </Card>
 
-      {/* Edit Modal */}
       <ProductEditModal
         visible={editModalVisible}
         productId={selectedProductId}

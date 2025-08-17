@@ -97,12 +97,10 @@ export default function OrderDetailPage() {
       }
       
       setUser(userData);
-      
-      // Siparişi al
+
       const orderData = await getOrderById(orderId);
       setOrder(orderData);
-      
-             // Ürün detaylarını al
+
        const orderItemsWithProducts = await Promise.all(
          orderData.orderItems.map(async (item) => {
            try {
@@ -117,7 +115,6 @@ export default function OrderDetailPage() {
        
        setOrder(prev => prev ? { ...prev, orderItemsWithProducts } : null);
        
-       // Kullanıcının yorumlarını kontrol et
        const reviews: {[productId: string]: any} = {};
        for (const item of orderItemsWithProducts) {
          if (typeof item.product === 'object' && item.product !== null) {
@@ -141,7 +138,6 @@ export default function OrderDetailPage() {
     }
   };
 
-  // Sipariş durumu için renk ve ikon
   const getStatusConfig = (status: string) => {
     switch (status) {
       case 'pending':
@@ -159,7 +155,7 @@ export default function OrderDetailPage() {
     }
   };
 
-  // Ödeme yöntemi için ikon
+
   const getPaymentIcon = (method: string) => {
     switch (method) {
       case 'card':
@@ -173,21 +169,21 @@ export default function OrderDetailPage() {
     }
   };
 
-  // Yorum yapma modal'ını aç
+
   const openReviewModal = (product: Product) => {
     setSelectedProduct(product);
     setReviewModalVisible(true);
     reviewForm.resetFields();
   };
 
-  // Yorum yapma modal'ını kapat
+
   const closeReviewModal = () => {
     setReviewModalVisible(false);
     setSelectedProduct(null);
     reviewForm.resetFields();
   };
 
-  // Yorum gönder
+
   const handleSubmitReview = async (values: any) => {
     if (!selectedProduct) return;
     
@@ -202,7 +198,6 @@ export default function OrderDetailPage() {
       
       const newReview = await createReview(reviewData);
       
-      // userReviews state'ini güncelle
       setUserReviews(prev => ({
         ...prev,
         [selectedProduct._id]: newReview
@@ -219,7 +214,7 @@ export default function OrderDetailPage() {
     }
   };
 
-  // Timeline için sipariş durumları
+
   const getTimelineItems = (status: string) => {
     const items = [
       {
@@ -302,7 +297,6 @@ export default function OrderDetailPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                 {/* Header */}
          <div className="mb-8">
            <div className="flex flex-col space-y-4">
              <div className="flex items-center space-x-4">
@@ -341,15 +335,12 @@ export default function OrderDetailPage() {
         </div>
 
         <Row gutter={[24, 24]}>
-          {/* Sol Kolon - Sipariş Detayları */}
           <Col xs={24} lg={16}>
             <div className="space-y-6">
-              {/* Sipariş Durumu Timeline */}
               <Card title="📋 Sipariş Durumu" className="shadow-sm">
                 <Timeline items={getTimelineItems(order.status)} />
               </Card>
 
-              {/* Ürün Listesi */}
               <Card title="🛍️ Sipariş Edilen Ürünler" className="shadow-sm">
                 <div className="space-y-4">
                   {order.orderItemsWithProducts?.map((item, index) => {
@@ -358,7 +349,6 @@ export default function OrderDetailPage() {
                     
                     return (
                       <div key={index} className="flex items-start space-x-4 p-4 border border-gray-100 rounded-lg">
-                        {/* Ürün Görseli */}
                         <div className="flex-shrink-0">
                           {isProductObject && product.images && product.images.length > 0 ? (
                             <Image
@@ -376,7 +366,6 @@ export default function OrderDetailPage() {
                           )}
                         </div>
 
-                        {/* Ürün Bilgileri */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
@@ -400,7 +389,6 @@ export default function OrderDetailPage() {
                                  <span>Birim Fiyat: ₺{item.price.toLocaleString('tr-TR')}</span>
                                </div>
                                
-                                                               {/* Yorum Yap Butonu - Sadece teslim edilen siparişlerde göster */}
                                 {order.status === 'delivered' && (
                                   userReviews[product._id] ? (
                                     <div className="mt-2 flex items-center space-x-2">
@@ -439,10 +427,9 @@ export default function OrderDetailPage() {
             </div>
           </Col>
 
-          {/* Sağ Kolon - Özet Bilgiler */}
+
           <Col xs={24} lg={8}>
             <div className="space-y-6">
-              {/* Sipariş Özeti */}
               <Card title="📊 Sipariş Özeti" className="shadow-sm">
                 <div className="space-y-4">
                   <div className="flex justify-between">
@@ -483,7 +470,6 @@ export default function OrderDetailPage() {
                 </div>
               </Card>
 
-              {/* Teslimat Adresi */}
               <Card title="📍 Teslimat Adresi" className="shadow-sm">
                 <div className="space-y-3">
                   <div className="flex items-start space-x-3">
@@ -499,7 +485,6 @@ export default function OrderDetailPage() {
                 </div>
               </Card>
 
-              {/* Müşteri Bilgileri */}
               {user && (
                 <Card title="👤 Müşteri Bilgileri" className="shadow-sm">
                   <div className="space-y-3">
@@ -533,7 +518,6 @@ export default function OrderDetailPage() {
          </Row>
        </div>
 
-       {/* Yorum Yapma Modal */}
        <Modal
          title={
            <div className="flex items-center space-x-3">

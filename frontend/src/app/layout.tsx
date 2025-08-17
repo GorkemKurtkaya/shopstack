@@ -32,7 +32,6 @@ export default function RootLayout({
         <ConfigProvider
           theme={{
             token: {
-              // Ant Design v5 compatible mode
               borderRadius: 6,
             },
           }}

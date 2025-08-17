@@ -70,7 +70,6 @@ export default function OrdersPage() {
     try {
       setLoading(true);
       
-      // Önce authentication durumunu kontrol et
       const authResult = await checkAuth();
       
       if (!authResult.isAuthenticated) {
@@ -78,8 +77,6 @@ export default function OrdersPage() {
         router.push('/auth/login');
         return;
       }
-
-      // Kullanıcı bilgilerini al
       const userData = await getCurrentUser();
       if (!userData) {
         message.error('Kullanıcı bilgileri alınamadı');
@@ -88,11 +85,9 @@ export default function OrdersPage() {
       }
       
       setUser(userData);
-      
-      // Siparişleri al
+
       const userOrders = await getUserOrders(userData.id);
       
-      // Ürün detaylarını al
       const ordersWithProducts = await Promise.all(
         userOrders.map(async (order) => {
           const orderItemsWithProducts = await Promise.all(
@@ -111,11 +106,14 @@ export default function OrdersPage() {
         })
       );
       
-             setOrders(ordersWithProducts);
-       
-       // Kullanıcının yorumlarını kontrol et
+      const sortedOrders = [...ordersWithProducts].sort((a, b) => {
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+      setOrders(sortedOrders);
+      
+
        const reviews: {[productId: string]: any} = {};
-       for (const order of ordersWithProducts) {
+       for (const order of sortedOrders) {
          for (const item of order.orderItemsWithProducts || []) {
            if (typeof item.product === 'object' && item.product !== null) {
              try {
@@ -139,7 +137,6 @@ export default function OrdersPage() {
     }
   };
 
-  // Sipariş durumu için renk ve ikon
   const getStatusConfig = (status: string) => {
     switch (status) {
       case 'pending':
@@ -157,21 +154,21 @@ export default function OrdersPage() {
     }
   };
 
-  // Yorum yapma modal'ını aç
+
   const openReviewModal = (product: Product) => {
     setSelectedProduct(product);
     setReviewModalVisible(true);
     reviewForm.resetFields();
   };
 
-  // Yorum yapma modal'ını kapat
+
   const closeReviewModal = () => {
     setReviewModalVisible(false);
     setSelectedProduct(null);
     reviewForm.resetFields();
   };
 
-  // Yorum gönder
+
   const handleSubmitReview = async (values: any) => {
     if (!selectedProduct) return;
     
@@ -186,7 +183,6 @@ export default function OrdersPage() {
       
       const newReview = await createReview(reviewData);
       
-      // userReviews state'ini güncelle
       setUserReviews(prev => ({
         ...prev,
         [selectedProduct._id]: newReview
@@ -203,7 +199,6 @@ export default function OrdersPage() {
     }
   };
 
-  // Ödeme yöntemi için ikon
   const getPaymentIcon = (method: string) => {
     switch (method) {
       case 'card':
@@ -233,7 +228,6 @@ export default function OrdersPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                 {/* Header */}
          <div className="mb-8">
            <div className="flex flex-col space-y-4">
              <div className="flex items-center space-x-4">
@@ -259,8 +253,6 @@ export default function OrdersPage() {
              </Text>
            )}
         </div>
-
-        {/* Orders Content */}
         {orders.length === 0 ? (
           <Card className="text-center py-16">
             <Empty
@@ -310,7 +302,6 @@ export default function OrdersPage() {
                   }
                 >
                   <Row gutter={[16, 16]}>
-                    {/* Sipariş Özeti */}
                     <Col xs={24} md={16}>
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
@@ -335,7 +326,7 @@ export default function OrdersPage() {
                                      )}
                                    </Text>
                                    
-                                                                       {/* Yorum Yap Butonu - Sadece teslim edilen siparişlerde göster */}
+                                  
                                     {order.status === 'delivered' && isProductObject && (
                                       userReviews[product._id] ? (
                                         <div className="mt-1 flex items-center space-x-2">
@@ -374,7 +365,6 @@ export default function OrdersPage() {
                       </div>
                     </Col>
 
-                    {/* Sipariş Bilgileri */}
                     <Col xs={24} md={8}>
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
@@ -404,7 +394,7 @@ export default function OrdersPage() {
 
                   <Divider className="my-4" />
                   
-                  {/* Teslimat Adresi */}
+
                   <div className="flex items-start space-x-3">
                     <HomeOutlined className="text-gray-400 mt-1" />
                     <div className="flex-1">
@@ -423,7 +413,6 @@ export default function OrdersPage() {
          )}
        </div>
 
-       {/* Yorum Yapma Modal */}
        <Modal
          title={
            <div className="flex items-center space-x-3">

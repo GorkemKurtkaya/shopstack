@@ -33,15 +33,30 @@ export const createProductService = async (userRole, data, imagePaths = []) => {
 };
 
 // Ürün güncelleme
-export const updateProductService = async (userRole, productId, productData) => {
-
-    const updatedProduct = await Product.findByIdAndUpdate(productId, { $set: productData }, { new: true });
-
-    if (!updatedProduct) {
+export const updateProductService = async (userRole, productId, productData, newImagePaths = [], removeImages = []) => {
+    const product = await Product.findById(productId);
+    if (!product) {
         throw new Error("Product not found or invalid ID");
     }
 
-    return updatedProduct;
+    if (Array.isArray(removeImages) && removeImages.length > 0) {
+        product.images = product.images.filter(img => !removeImages.includes(img));
+    }
+
+  
+    if (Array.isArray(newImagePaths) && newImagePaths.length > 0) {
+        product.images = [...product.images, ...newImagePaths];
+    }
+
+    const updatable = { name:1, description:1, category:1, price:1, stock:1, specifications:1, tags:1, featured:1, variants:1 };
+    Object.keys(productData || {}).forEach((key) => {
+        if (updatable[key] !== undefined) {
+            product[key] = key === 'price' || key === 'stock' ? Number(productData[key]) : productData[key];
+        }
+    });
+
+    await product.save();
+    return product;
 };
 
 

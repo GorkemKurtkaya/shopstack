@@ -63,7 +63,6 @@ export default function UsersPage() {
   const [editForm] = Form.useForm();
   const router = useRouter();
 
-  // Kullanıcıları yükle
   const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
@@ -90,7 +89,7 @@ export default function UsersPage() {
     fetchUsers();
   }, [fetchUsers]);
 
-  // Kullanıcı sil
+
   const handleDelete = async (id: string) => {
     try {
       await deleteUser(id);
@@ -103,7 +102,7 @@ export default function UsersPage() {
 
 
 
-  // Edit modal'ı aç
+
   const handleEdit = (user: User) => {
     setSelectedUser(user);
     editForm.setFieldsValue({
@@ -116,7 +115,7 @@ export default function UsersPage() {
     setEditModalVisible(true);
   };
 
-  // Edit form'u gönder
+
   const handleEditSubmit = async (values: any) => {
     if (!selectedUser) return;
     
@@ -132,7 +131,7 @@ export default function UsersPage() {
     }
   };
 
-  // Filtreleme ve arama
+
   const filteredUsers = Array.isArray(users) ? users.filter(user => {
     if (!user || typeof user !== 'object') return false;
     
@@ -150,7 +149,7 @@ export default function UsersPage() {
     return matchesSearch && matchesRole && matchesVerified;
   }) : [];
 
-  // Tablo sütunları
+
   const columns = [
     {
       title: 'Kullanıcı',
@@ -280,7 +279,6 @@ export default function UsersPage() {
     },
   ];
 
-  // İstatistikler
   const stats = {
     total: Array.isArray(users) ? users.length : 0,
     verified: Array.isArray(users) ? users.filter(u => u?.emailVerified).length : 0,
@@ -303,7 +301,6 @@ export default function UsersPage() {
         </Button>
       </div>
 
-      {/* İstatistikler */}
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={12} md={6}>
           <Card className="shadow-lg border-2 border-gray-100 bg-gradient-to-br from-white to-gray-50">
@@ -346,7 +343,7 @@ export default function UsersPage() {
         </Col>
       </Row>
 
-      {/* Filtreler */}
+
       <Card className="shadow-lg border-2 border-gray-100 bg-gradient-to-br from-white to-gray-50">
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
           <div className="w-full sm:w-auto">
@@ -398,7 +395,6 @@ export default function UsersPage() {
         </div>
       </Card>
 
-      {/* Kullanıcı Tablosu */}
       <Card className="shadow-lg border-2 border-gray-100 bg-gradient-to-br from-white to-gray-50">
         <div className="overflow-x-auto">
           <Table
@@ -431,7 +427,6 @@ export default function UsersPage() {
         </div>
       </Card>
 
-      {/* Edit Modal */}
       <Modal
         title="Kullanıcı Düzenle"
         open={editModalVisible}

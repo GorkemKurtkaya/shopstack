@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from 'react';
+import { Modal, Input as AntInput, message } from 'antd';
+import { useRouter } from 'next/navigation';
+import ForgotPasswordModal from '@/components/forgot-passwordModal';
 import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
 import { IconEye, IconEyeOff, IconLock, IconMail, IconUser } from '@tabler/icons-react';
@@ -11,8 +14,10 @@ export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [forgotOpen, setForgotOpen] = useState(false);
   
   const { login } = useAuth();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,9 +43,10 @@ export default function LoginForm() {
   };
 
   return (
+    <>
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 px-4">
       <div className="max-w-md w-full space-y-8">
-        {/* Header */}
+
         <div className="text-center">
           <div className="mx-auto h-20 w-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg mb-6">
             <IconUser className="h-10 w-10 text-white" />
@@ -53,10 +59,9 @@ export default function LoginForm() {
           </p>
         </div>
 
-        {/* Form */}
         <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email Field */}
+
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                 E-posta Adresi
@@ -79,7 +84,7 @@ export default function LoginForm() {
               </div>
             </div>
 
-            {/* Password Field */}
+
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                 Şifre
@@ -113,14 +118,13 @@ export default function LoginForm() {
               </div>
             </div>
 
-            {/* Error Message */}
+
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-xl p-4">
                 <p className="text-sm text-red-600">{error}</p>
               </div>
             )}
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading}
@@ -137,7 +141,6 @@ export default function LoginForm() {
             </button>
           </form>
 
-          {/* Links */}
           <div className="mt-6 text-center space-y-3">
             <div>
               <Link 
@@ -148,25 +151,25 @@ export default function LoginForm() {
               </Link>
             </div>
             <div>
-              <Link 
-                href="/auth/forgot-password" 
-                className="text-sm text-gray-500 hover:text-gray-700 transition-colors duration-200"
+              <button
+                type="button"
+                onClick={() => setForgotOpen(true)}
+                className="text-sm text-gray-500 hover:text-white-700 transition-colors duration-200 cursor-pointer"
               >
                 Şifrenizi mi unuttunuz?
-              </Link>
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Footer */}
         <div className="text-center">
           <p className="text-xs text-gray-500">
             Giriş yaparak{' '}
-            <Link href="/terms" className="text-indigo-600 hover:text-indigo-500">
+            <Link href="/" className="text-indigo-600 hover:text-indigo-500">
               Kullanım Şartları
             </Link>
             {' '}ve{' '}
-            <Link href="/privacy" className="text-indigo-600 hover:text-indigo-500">
+            <Link href="/" className="text-indigo-600 hover:text-indigo-500">
               Gizlilik Politikası
             </Link>
             'nı kabul etmiş olursunuz.
@@ -174,5 +177,8 @@ export default function LoginForm() {
         </div>
       </div>
     </div>
+
+    <ForgotPasswordModal open={forgotOpen} onClose={() => setForgotOpen(false)} initialEmail={email} />
+    </>
   );
 }

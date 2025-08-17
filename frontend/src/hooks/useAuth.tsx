@@ -108,7 +108,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const data = await response.json();
         setUser(data.user);
         
-        // Role'e göre yönlendirme
         if (data.user.role === 'admin') {
           router.push('/admin/dashboard');
         } else {

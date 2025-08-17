@@ -80,7 +80,6 @@ export default function ProfilePage() {
       try {
         setLoading(true);
         
-        // Önce authentication durumunu kontrol et
         const authResult = await checkAuth();
         
         if (!authResult.isAuthenticated) {
@@ -89,7 +88,6 @@ export default function ProfilePage() {
           return;
         }
 
-        // Kullanıcı bilgilerini al
         const userData = await getCurrentUser();
         
         if (!userData) {
@@ -142,14 +140,12 @@ export default function ProfilePage() {
         message.success('Profil başarıyla güncellendi!');
         setIsProfileModalVisible(false);
         
-        // Backend'den gelen güncel kullanıcı bilgilerini kullan
         if (result.user) {
           setUser(result.user);
           if (result.user.favoriteCategories) {
             setFavoriteCategories(result.user.favoriteCategories);
           }
         } else if (user) {
-          // Fallback: Sadece form verilerini güncelle
           setUser({
             ...user,
             ...values

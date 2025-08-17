@@ -43,14 +43,13 @@ export default function ProductDetailPage() {
   const params = useParams();
   const productId = params.id as string;
 
-  // Ürün verilerini yükle
+
   const fetchProduct = useCallback(async () => {
     try {
       setInitialLoading(true);
       const data = await getProductById(productId);
       setProduct(data);
-      
-      // Kategori bilgisini çek
+
       if (data.category && typeof data.category === 'string') {
         try {
           const categoryData = await getCategoryById(data.category);
@@ -75,13 +74,12 @@ export default function ProductDetailPage() {
     }
   }, [productId, fetchProduct]);
 
-  // Featured durumunu güncelle
+
   const handleFeaturedChange = async (featured: boolean) => {
     try {
       setLoading(true);
       await updateProductStatus(productId, { featured });
       message.success('Ürün durumu güncellendi');
-      // Ürün verilerini yenile
       const data = await getProductById(productId);
       setProduct(data);
     } catch (error) {
@@ -91,7 +89,7 @@ export default function ProductDetailPage() {
     }
   };
 
-  // Ürün sil
+
   const handleDelete = async () => {
     try {
       await deleteProduct(productId);
@@ -128,7 +126,6 @@ export default function ProductDetailPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <Button
@@ -161,7 +158,6 @@ export default function ProductDetailPage() {
       </div>
 
       <Row gutter={24}>
-        {/* Sol Kolon - Ürün Görselleri */}
         <Col span={12}>
           <Card 
             title="Ürün Görselleri" 
@@ -191,7 +187,6 @@ export default function ProductDetailPage() {
           </Card>
         </Col>
 
-        {/* Sağ Kolon - Ürün Bilgileri */}
         <Col span={12}>
           <Card 
             title="Temel Bilgiler" 
@@ -234,7 +229,6 @@ export default function ProductDetailPage() {
             </Descriptions>
           </Card>
 
-          {/* İstatistikler */}
           <Card 
             title="İstatistikler" 
             className="mt-6 shadow-lg border-2 border-gray-100 bg-gradient-to-br from-white to-gray-50"
@@ -266,7 +260,6 @@ export default function ProductDetailPage() {
         </Col>
       </Row>
 
-      {/* Açıklama */}
       <Card 
         title="Açıklama" 
         className="mt-6 shadow-lg border-2 border-gray-100 bg-gradient-to-br from-white to-gray-50"
@@ -274,7 +267,6 @@ export default function ProductDetailPage() {
         <Text className="text-gray-700 leading-relaxed">{product.description || 'Açıklama bulunamadı'}</Text>
       </Card>
 
-      {/* Etiketler */}
       {product.tags && product.tags.length > 0 && (
         <Card 
           title="Etiketler" 
@@ -288,7 +280,6 @@ export default function ProductDetailPage() {
         </Card>
       )}
 
-      {/* Teknik Özellikler */}
       {product.specifications && Object.keys(product.specifications).length > 0 && (
         <Card 
           title="Teknik Özellikler" 
@@ -304,7 +295,6 @@ export default function ProductDetailPage() {
         </Card>
       )}
 
-      {/* Varyantlar */}
       {product.variants && product.variants.length > 0 && (
         <Card 
           title="Varyantlar" 
@@ -330,7 +320,6 @@ export default function ProductDetailPage() {
         </Card>
       )}
 
-      {/* Tarih Bilgileri */}
       <Card 
         title="Tarih Bilgileri" 
         className="mt-6 shadow-lg border-2 border-gray-100 bg-gradient-to-br from-white to-gray-50"
@@ -355,7 +344,6 @@ export default function ProductDetailPage() {
         </Row>
       </Card>
 
-      {/* Edit Modal */}
       <ProductEditModal
         visible={editModalVisible}
         productId={productId}

@@ -40,7 +40,7 @@ export default function CategoriesPage() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [form] = Form.useForm();
 
-  // Kategorileri yükle
+
   const fetchCategories = useCallback(async () => {
     try {
       setLoading(true);
@@ -59,7 +59,7 @@ export default function CategoriesPage() {
     fetchCategories();
   }, [fetchCategories]);
 
-  // Modal aç
+
   const showModal = (category?: Category) => {
     if (category) {
       setEditingCategory(category);
@@ -74,14 +74,14 @@ export default function CategoriesPage() {
     setModalVisible(true);
   };
 
-  // Modal kapat
+
   const handleCancel = () => {
     setModalVisible(false);
     setEditingCategory(null);
     form.resetFields();
   };
 
-  // Form gönderimi
+
   const handleSubmit = async (values: any) => {
     try {
       if (editingCategory) {
@@ -98,7 +98,7 @@ export default function CategoriesPage() {
     }
   };
 
-  // Kategori sil
+
   const handleDelete = async (id: string) => {
     try {
       await deleteCategory(id);
@@ -109,7 +109,7 @@ export default function CategoriesPage() {
     }
   };
 
-  // Active durumunu güncelle
+
   const handleActiveChange = async (id: string, active: boolean) => {
     try {
       await updateCategoryStatus(id, active);
@@ -120,7 +120,7 @@ export default function CategoriesPage() {
     }
   };
 
-  // Filtreleme - Sadece arama metnine göre filtrele
+
   const filteredCategories = categories.filter(category => {
     if (searchText === '') return true;
     
@@ -128,7 +128,7 @@ export default function CategoriesPage() {
            category.slug.toLowerCase().includes(searchText.toLowerCase());
   });
 
-  // Tablo sütunları
+
   const columns = [
     {
       title: 'Kategori Adı',
@@ -165,7 +165,7 @@ export default function CategoriesPage() {
       onFilter: (value: string | number | boolean, record: Category) => {
         if (value === 'true') return record.active === true;
         if (value === 'false') return record.active === false;
-        return true; // Tüm kategorileri göster
+        return true; 
       },
     },
     {
@@ -224,7 +224,7 @@ export default function CategoriesPage() {
     },
   ];
 
-  // İstatistikler
+
   const stats = {
     total: categories.length,
     active: categories.filter(c => c.active).length,
@@ -246,7 +246,7 @@ export default function CategoriesPage() {
           </Button>
       </div>
 
-      {/* İstatistikler */}
+
       <Row gutter={16}>
         <Col span={8}>
           <Card className="shadow-lg border-2 border-gray-100 bg-gradient-to-br from-white to-gray-50">
@@ -280,7 +280,7 @@ export default function CategoriesPage() {
         </Col>
       </Row>
 
-      {/* Filtreler */}
+
       <Card className="shadow-lg border-2 border-gray-100 bg-gradient-to-br from-white to-gray-50">
         <div className="flex flex-wrap gap-4 items-center">
           <Search
@@ -302,7 +302,7 @@ export default function CategoriesPage() {
         </div>
       </Card>
 
-      {/* Kategoriler Tablosu */}
+
       <Card className="shadow-lg border-2 border-gray-100 bg-gradient-to-br from-white to-gray-50">
         <Table
           columns={columns as any}
@@ -319,7 +319,7 @@ export default function CategoriesPage() {
         />
       </Card>
 
-      {/* Kategori Modal */}
+
       <Modal
         title={
           <div className="flex items-center space-x-2">

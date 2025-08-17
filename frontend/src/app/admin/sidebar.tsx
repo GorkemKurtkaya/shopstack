@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, memo } from 'react';
+import { useState, useCallback, memo, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -16,6 +16,7 @@ import {
     IconMessageCircle,
     IconChevronDown
 } from '@tabler/icons-react';
+import { getCurrentUser, User } from '@/services/auth';
 
 interface SidebarProps {
     isSidebarOpen: boolean;
@@ -26,6 +27,19 @@ const Sidebar = memo(({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
     const pathname = usePathname();
     const router = useRouter();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [adminUser, setAdminUser] = useState<User | null>(null);
+
+    useEffect(() => {
+        const loadUser = async () => {
+            try {
+                const me = await getCurrentUser();
+                setAdminUser(me);
+            } catch (_) {
+                setAdminUser(null);
+            }
+        };
+        loadUser();
+    }, []);
 
     const handleLogout = useCallback(async () => {
         try {
@@ -127,8 +141,8 @@ const Sidebar = memo(({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
                             className="w-full flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-100"
                         >
                             <div className="flex-1 text-left">
-                                <div className="text-sm font-semibold text-gray-700">Admin Kullanıcı</div>
-                                <div className="text-xs text-gray-500">admin@example.com</div>
+                                <div className="text-sm font-semibold text-gray-700">{adminUser ? `${adminUser.firstName} ${adminUser.lastName}` : 'Admin Kullanıcı'}</div>
+                                <div className="text-xs text-gray-500">{adminUser?.email || ''}</div>
                             </div>
                             <IconChevronDown
                                 className={`w-4 h-4 text-gray-400 transition-transform duration-150 ${isDropdownOpen ? 'rotate-180' : ''}`}

@@ -5,7 +5,7 @@ import { Chart } from 'chart.js/auto';
 import { getAllOrders, getOrderIncome, Order } from '@/services/orders';
 import { getAllProducts, Product } from '@/services/product';
 
-// Güvenli tarih işleme fonksiyonu
+
 const isValidDate = (dateString: string): boolean => {
   const date = new Date(dateString);
   return date instanceof Date && !isNaN(date.getTime());

@@ -10,6 +10,7 @@ import {
 } from "../services/authService.js";
 import logger from "../utils/logger.js";
 import { validationResult } from 'express-validator';
+import jwt from 'jsonwebtoken';
 
 
 
@@ -42,14 +43,30 @@ export const loginUser = async (req, res) => {
         const { user, token } = await loginUserService(email, password);
 
 
+        const parseExpiryToMs = (val) => {
+            const match = String(val || '').trim().match(/^(\d+)([dhms])$/i);
+            if (!match) return 7 * 24 * 60 * 60 * 1000; // default: 7 gün
+            const amount = parseInt(match[1], 10);
+            const unit = match[2].toLowerCase();
+            switch (unit) {
+                case 'd': return amount * 24 * 60 * 60 * 1000;
+                case 'h': return amount * 60 * 60 * 1000;
+                case 'm': return amount * 60 * 1000;
+                case 's': return amount * 1000;
+                default: return 7 * 24 * 60 * 60 * 1000;
+            }
+        };
+
+        const cookieMaxAge = parseExpiryToMs(process.env.JWT_EXPIRES_IN || '3d');
+
         res.cookie("jwt", token, {
             httpOnly: true,
-            maxAge: 24 * 60 * 60 * 1000, 
+            maxAge: cookieMaxAge,
             sameSite: 'Lax'
         });
 
         res.cookie("user", user._id.toString(), {
-            maxAge: 24 * 60 * 60 * 1000, 
+            maxAge: cookieMaxAge,
             sameSite: 'Lax'
         });
 
@@ -217,3 +234,34 @@ export const checkAuthStatus = async (req, res) => {
         });
     }
 };
+
+
+export const checkAdmin = async (req, res) => {
+    try {
+      logger.info("Admin Kontrol İşlemi Başladı");
+      const token = req.cookies.jwt;
+      
+      if (!token) {
+        return res.status(401).json({ error: "Oturum bulunamadı" });
+      }
+
+      let decoded;
+      try {
+        decoded = jwt.verify(token, process.env.JWT_SECRET);
+      } catch (e) {
+        return res.status(401).json({ error: 'Geçersiz veya süresi dolmuş oturum' });
+      }
+
+      const user = await getMeService(decoded.userId);
+      
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ isAdmin: false });
+      }
+  
+      res.status(200).json({ isAdmin: true });
+    } catch (error) {
+      logger.error("Admin Kontrolü Sırasında Hata:", error);
+      res.status(401).json({ error: error.message });
+    }
+  };
+  

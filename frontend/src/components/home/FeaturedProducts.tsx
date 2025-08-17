@@ -10,7 +10,7 @@ export default function FeaturedProducts() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Öne çıkan ürünleri yükle
+
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
       try {
@@ -29,7 +29,7 @@ export default function FeaturedProducts() {
     fetchFeaturedProducts();
   }, []);
 
-  // Loading state
+
   if (loading) {
     return (
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
@@ -49,7 +49,7 @@ export default function FeaturedProducts() {
     );
   }
 
-  // Error state
+
   if (error) {
     return (
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
@@ -69,7 +69,7 @@ export default function FeaturedProducts() {
     );
   }
 
-  // No products state
+
   if (products.length === 0) {
     return (
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
@@ -103,7 +103,7 @@ export default function FeaturedProducts() {
         ))}
       </div>
 
-      {/* View All Products Button */}
+
       <div className="text-center mt-12">
         <Button
           type="primary"

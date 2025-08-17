@@ -19,7 +19,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [cartItemCount, setCartItemCount] = useState(0);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Sepet sayısını güncelle
+
   const updateCartCount = async () => {
     try {
       const count = await getCartItemCount();
@@ -29,17 +29,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Sepet sayısını artır
+
   const incrementCartCount = (amount: number = 1) => {
     setCartItemCount(prev => prev + amount);
   };
 
-  // Sepet sayısını azalt
+
   const decrementCartCount = (amount: number = 1) => {
     setCartItemCount(prev => Math.max(0, prev - amount));
   };
 
-  // Authentication kontrolü
+
   const checkAuthentication = async (): Promise<boolean> => {
     try {
       const authResult = await checkAuth();
@@ -52,7 +52,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // İlk yüklemede sepet sayısını al ve authentication kontrolü yap
   useEffect(() => {
     const initialize = async () => {
       await checkAuthentication();

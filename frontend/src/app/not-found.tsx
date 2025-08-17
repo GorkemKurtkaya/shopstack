@@ -33,7 +33,7 @@ export default function NotFound() {
           </Link>
           
           <Link 
-            href="/shop"
+            href="/"
             className="inline-block w-full bg-white text-gray-700 font-semibold py-3 px-6 rounded-lg border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
           >
             Alışverişe Başla

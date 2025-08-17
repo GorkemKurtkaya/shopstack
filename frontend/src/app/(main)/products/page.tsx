@@ -39,14 +39,13 @@ export default function ProductsPage() {
     }
   }, [searchParams]);
 
-  // Tüm ürünleri ve kategorileri yükle
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
         setError(null);
         
-        // Paralel olarak ürünleri ve kategorileri çek
         const [productsResponse, categoriesResponse] = await Promise.all([
           getAllProducts(),
           getActiveCategories()
@@ -66,7 +65,7 @@ export default function ProductsPage() {
     fetchData();
   }, []);
 
-  // Filtreleme ve arama
+
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          product.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -78,7 +77,7 @@ export default function ProductsPage() {
     return matchesSearch && matchesCategory;
   });
 
-  // Sıralama
+
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     switch (sortBy) {
       case 'name':
@@ -96,12 +95,10 @@ export default function ProductsPage() {
     }
   });
 
-  // Sayfalama
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = startIndex + pageSize;
   const currentProducts = sortedProducts.slice(startIndex, endIndex);
 
-  // Filtreleri temizle
   const clearFilters = () => {
     setSearchTerm('');
     setSelectedCategory('');
@@ -109,10 +106,10 @@ export default function ProductsPage() {
     setCurrentPage(1);
   };
 
-  // Seçili kategori bilgisi
+
   const selectedCategoryInfo = categories.find(c => c._id === selectedCategory);
 
-  // Loading state
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
@@ -125,7 +122,7 @@ export default function ProductsPage() {
     );
   }
 
-  // Error state
+
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
@@ -144,14 +141,12 @@ export default function ProductsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Carousel */}
       <div className="mb-8">
         <HeroCarousel />
       </div>
       
       <div className="py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Sayfa Başlığı */}
           <div className="text-center mb-8">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             {selectedCategoryInfo ? `${selectedCategoryInfo.name} Ürünleri` : 'Tüm Ürünler'}
@@ -164,10 +159,9 @@ export default function ProductsPage() {
           </p>
         </div>
 
-        {/* Filtreler ve Arama */}
+
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Arama */}
             <div className="md:col-span-2">
               <Search
                 placeholder="Ürün ara..."
@@ -179,7 +173,7 @@ export default function ProductsPage() {
               />
             </div>
 
-            {/* Kategori Filtresi */}
+
             <Select
               placeholder="Kategori seçin"
               value={selectedCategory}
@@ -196,7 +190,6 @@ export default function ProductsPage() {
               ))}
             </Select>
 
-            {/* Sıralama */}
             <Select
               placeholder="Sırala"
               value={sortBy}
@@ -212,7 +205,6 @@ export default function ProductsPage() {
             </Select>
           </div>
 
-          {/* Filtreleri Temizle */}
           {(searchTerm || selectedCategory || sortBy !== 'name') && (
             <div className="mt-4 flex justify-center">
               <Button
@@ -227,7 +219,6 @@ export default function ProductsPage() {
           )}
         </div>
 
-        {/* Sonuç Bilgisi */}
         <div className="mb-6">
           <p className="text-gray-600">
             {filteredProducts.length} ürün bulundu
@@ -236,7 +227,6 @@ export default function ProductsPage() {
           </p>
         </div>
 
-        {/* Ürün Listesi */}
         {currentProducts.length > 0 ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
@@ -245,7 +235,6 @@ export default function ProductsPage() {
               ))}
             </div>
 
-            {/* Sayfalama */}
             {filteredProducts.length > pageSize && (
               <div className="flex justify-center">
                 <Pagination
