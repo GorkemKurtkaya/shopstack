@@ -102,24 +102,31 @@ export const validateProfileUpdate = [
     .isLength({ min: 2, max: 50 })
     .withMessage('Soyad 2-50 karakter arasında olmalıdır'),
   
-  body('phone')
+  body('phoneNumber')
     .optional()
     .isMobilePhone('tr-TR')
     .withMessage('Geçerli bir telefon numarası giriniz'),
   
-  body('birthDate')
+  body('favoriteCategories')
     .optional()
-    .isISO8601()
-    .withMessage('Geçerli bir doğum tarihi giriniz')
+    .isArray()
+    .withMessage('Favori kategoriler array formatında olmalıdır'),
+  
+  body('favoriteCategories.*')
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ min: 1, max: 50 })
+    .withMessage('Kategori adı 1-50 karakter arasında olmalıdır')
 ];
 
 // Adres güncelleme validation
 export const validateAddressUpdate = [
-  body('address')
-    .isObject()
-    .withMessage('Adres bilgisi obje formatında olmalıdır'),
+  body('addresses')
+    .isArray()
+    .withMessage('Adresler array formatında olmalıdır'),
   
-  body('address.street')
+  body('addresses.*.street')
     .isString()
     .trim()
     .notEmpty()
@@ -127,7 +134,7 @@ export const validateAddressUpdate = [
     .isLength({ min: 5, max: 100 })
     .withMessage('Sokak adresi 5-100 karakter arasında olmalıdır'),
   
-  body('address.city')
+  body('addresses.*.city')
     .isString()
     .trim()
     .notEmpty()
@@ -135,16 +142,33 @@ export const validateAddressUpdate = [
     .isLength({ min: 2, max: 50 })
     .withMessage('Şehir 2-50 karakter arasında olmalıdır'),
   
-  body('address.postalCode')
-    .isPostalCode('TR')
-    .withMessage('Geçerli bir posta kodu giriniz'),
-  
-  body('address.country')
-    .optional()
+  body('addresses.*.state')
     .isString()
     .trim()
+    .notEmpty()
+    .withMessage('İl/İlçe zorunludur')
     .isLength({ min: 2, max: 50 })
-    .withMessage('Ülke 2-50 karakter arasında olmalıdır')
+    .withMessage('İl/İlçe 2-50 karakter arasında olmalıdır'),
+  
+  body('addresses.*.zipCode')
+    .isString()
+    .trim()
+    .notEmpty()
+    .withMessage('Posta kodu zorunludur')
+    .isLength({ min: 3, max: 10 })
+    .withMessage('Posta kodu 3-10 karakter arasında olmalıdır'),
+  
+  body('addresses.*.country')
+    .isString()
+    .trim()
+    .notEmpty()
+    .withMessage('Ülke zorunludur')
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Ülke 2-50 karakter arasında olmalıdır'),
+  
+  body('addresses.*.isDefault')
+    .isBoolean()
+    .withMessage('Varsayılan adres boolean değer olmalıdır')
 ];
 
 

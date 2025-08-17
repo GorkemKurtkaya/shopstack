@@ -3,7 +3,9 @@ import {
     getProductReviewsService,
     updateReviewService,
     deleteReviewService,
-    approveReviewService
+    approveReviewService,
+    getAllReviewsService,
+    checkUserReviewService,
 } from "../services/reviewService.js";
 
 export const createReview = async (req, res) => {
@@ -25,6 +27,16 @@ export const getProductReviews = async (req, res) => {
         return res.status(400).json({ message: e.message });
     }
 };
+
+export const getAllReviews = async (req, res) => {
+    try {
+        const includeUnapproved = req.query.includeUnapproved !== 'false'; // Varsayılan olarak true
+        const reviews = await getAllReviewsService(includeUnapproved);
+        return res.status(200).json(reviews);
+    } catch (e) {
+        return res.status(400).json({ message: e.message });
+    }
+}
 
 export const updateReview = async (req, res) => {
     try {
@@ -53,6 +65,24 @@ export const approveReview = async (req, res) => {
         const { reviewId } = req.params;
         const { approved } = req.body;
         const review = await approveReviewService(reviewId, approved);
+        return res.status(200).json(review);
+    } catch (e) {
+        return res.status(400).json({ message: e.message });
+    }
+};
+
+// Kullanıcının belirli bir ürün için yorum yapıp yapmadığını kontrol et
+export const checkUserReview = async (req, res) => {
+    try {
+        const { productId } = req.params;
+        const userId = req.user._id;
+        
+        const review = await checkUserReviewService(userId, productId);
+        
+        if (!review) {
+            return res.status(404).json({ message: "Bu ürün için yorum bulunamadı" });
+        }
+        
         return res.status(200).json(review);
     } catch (e) {
         return res.status(400).json({ message: e.message });

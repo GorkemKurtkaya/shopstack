@@ -1,4 +1,4 @@
-import { listActiveCategories, createCategory, updateCategory, deleteCategory } from "../services/categoryService.js";
+import { listActiveCategories, listAllCategories, createCategory, updateCategory, deleteCategory, getCategoryFromId } from "../services/categoryService.js";
 
 export const getCategories = async (req, res) => {
 	try {
@@ -9,6 +9,27 @@ export const getCategories = async (req, res) => {
 		return res.status(500).json({ message: e.message });
 	}
 };
+
+export const getAllCategories = async (req, res) => {
+	try {
+		const sort = req.query.sort || 'name';
+		const cats = await listAllCategories(sort);
+		return res.status(200).json(cats);
+	} catch (e) {
+		return res.status(500).json({ message: e.message });
+	}
+};
+
+export const getCategoryById = async (req, res) => {
+	try {
+		const cats = await listAllCategories();
+		const cat = cats.find(cat => cat._id.toString() === req.params.id);
+		if (!cat) return res.status(404).json({ message: 'Kategori bulunamadı' });
+		return res.status(200).json(cat);
+	} catch (e) {
+		return res.status(500).json({ message: e.message });
+	}
+}
 
 export const adminCreateCategory = async (req, res) => {
 	try {

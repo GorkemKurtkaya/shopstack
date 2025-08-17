@@ -1,5 +1,5 @@
 import express from 'express';
-import { getCategories, adminCreateCategory, adminUpdateCategory, adminDeleteCategory } from '../controllers/categoryController.js';
+import { getCategories, getAllCategories, adminCreateCategory, adminUpdateCategory, adminDeleteCategory, getCategoryById } from '../controllers/categoryController.js';
 import { authenticateToken, requireAdmin } from '../middlewares/authmiddleware.js';
 import {
   validateCreateCategory,
@@ -10,7 +10,9 @@ import {
 const router = express.Router();
 
 // Public
-router.get('/categories', getCategories);
+router.get('/categories/active', getCategories);
+router.get('/categories', getAllCategories); 
+router.get('/categories/:id', getCategoryById); 
 
 // Admin
 router.post('/admin/categories', authenticateToken, requireAdmin, validateCreateCategory, adminCreateCategory);

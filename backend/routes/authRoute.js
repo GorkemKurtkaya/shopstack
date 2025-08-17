@@ -10,7 +10,7 @@ import {
   validateForgotPassword,
   validateResetPassword,
   validateProfileUpdate,
-  validateAddressUpdate
+  validateAddressUpdate,
 } from "../middlewares/validations/authvalidationMiddleware.js";
 
 const router = express.Router();
@@ -34,6 +34,7 @@ router.put('/me/address', authMiddleWare.authenticateToken, validateAddressUpdat
 
 // Kullanıcı durumu kontrolü
 router.get("/check-auth", checkUser, authController.checkAuthStatus);
+router.get("/check-admin",  authController.checkAdmin);
 
 
 

@@ -69,3 +69,25 @@ export const approveReviewService = async (reviewId, approved) => {
     return review;
 };
 
+
+export const getAllReviewsService = async (includeUnapproved = false) => {
+    const filter = {};
+    if (!includeUnapproved) filter.approved = true;
+    return Review.find(filter)
+        .populate("user", "firstName lastName")
+        .populate("product", "name slug")
+        .sort({ createdAt: -1 });
+}
+
+// Kullanıcının belirli bir ürün için yorum yapıp yapmadığını kontrol et
+export const checkUserReviewService = async (userId, productId) => {
+    const review = await Review.findOne({ 
+        user: userId, 
+        product: productId 
+    }).populate("user", "firstName lastName");
+    
+    return review;
+}
+
+
+

@@ -1,5 +1,8 @@
 import { body, param } from 'express-validator';
 
+// Türkiye posta kodu validasyonu için özel regex
+const turkishPostalCodeRegex = /^[0-9]{5}$/;
+
 // Sipariş oluşturma validation
 export const validateCreateOrder = [
   body('orderItems')
@@ -60,8 +63,8 @@ export const validateCreateOrder = [
     .withMessage('İl/eyalet 2-50 karakter arasında olmalıdır'),
   
   body('shippingAddress.zipCode')
-    .isPostalCode('TR')
-    .withMessage('Geçerli bir posta kodu giriniz'),
+    .matches(turkishPostalCodeRegex)
+    .withMessage('Geçerli bir Türkiye posta kodu giriniz (5 haneli sayı)'),
   
   body('shippingAddress.country')
     .optional()
@@ -158,8 +161,8 @@ export const validateUpdateOrder = [
   
   body('shippingAddress.zipCode')
     .optional()
-    .isPostalCode('TR')
-    .withMessage('Geçerli bir posta kodu giriniz'),
+    .matches(turkishPostalCodeRegex)
+    .withMessage('Geçerli bir Türkiye posta kodu giriniz (5 haneli sayı)'),
   
   body('shippingAddress.country')
     .optional()

@@ -40,11 +40,36 @@ export const updateProduct = async (req, res) => {
             message: "Product ID is required",
         });
     }
-
     try {
         logger.info("Ürün Güncelleme İşlemi");
-        const updatedProduct = await productService.updateProductService(req.user.role, req.params.id, req.body);
-        res.status(200).json(updatedProduct);
+
+        const files = Array.isArray(req.files) ? req.files : (req.file ? [req.file] : []);
+        const imagePaths = files.map(f => (f.filename ? `/uploads/${f.filename}` : f.path)).filter(Boolean);
+
+        const data = { ...req.body };
+        if (typeof data.tags === 'string') {
+            data.tags = data.tags.split(',').map(t => t.trim()).filter(Boolean);
+        }
+        if (typeof data.specifications === 'string') {
+            try { data.specifications = JSON.parse(data.specifications); } catch (_) {}
+        }
+        if (typeof data.variants === 'string') {
+            try { data.variants = JSON.parse(data.variants); } catch (_) {}
+        }
+
+        const removeImages = typeof data.removeImages === 'string'
+          ? data.removeImages.split(',').map(s => s.trim()).filter(Boolean)
+          : Array.isArray(data.removeImages) ? data.removeImages : [];
+
+        const updatedProduct = await productService.updateProductService(
+            req.user.role,
+            req.params.id,
+            data,
+            imagePaths,
+            removeImages
+        );
+
+        res.status(200).json({ succeeded: true, product: updatedProduct, message: 'Ürün güncellendi' });
         console.log("Ürün güncellendi");
         logger.info("Ürün Güncellendi");
     } catch (error) {
@@ -86,7 +111,6 @@ export const getAProduct = async (req, res) => {
         logger.info("Ürün Getirme İşlemi");
         const product = await productService.getAProductService(req.params.id);
         res.status(200).json(product);
-        console.log("Ürün getirildi");
     } catch (error) {
         res.status(500).json({
             succeeded: false,
@@ -114,3 +138,17 @@ export const getAllProduct = async (req, res) => {
 };
 
 
+// Öne Çıkan Ürünleri getirme
+export const getFeaturedProducts = async (req, res) => {
+    try {
+        logger.info("Öne Çıkan Ürünleri Getirme İşlemi");
+        const products = await productService.getFeaturedProductsService();
+        res.status(200).json(products);
+    } catch (error) {
+        res.status(500).json({
+            succeeded: false,
+            message: error.message,
+        });
+        logger.error("Öne Çıkan Ürünler Getirilirken Hata Oluştu:", error);
+    }
+}
