@@ -9,13 +9,13 @@ const getCartKey = (userId) => `cart:${String(userId)}`;
 
 
 // Sepete ürün ekleme
-async function addToCart(params) {
+export const addToCart = async (params) => {
     const { userId, product } = params;
     const cartKey = getCartKey(userId);
     try {
         const client = redisClient;
-        
-        
+
+
         const existingCartString = await client.get(cartKey);
         let existingCart = [];
 
@@ -49,29 +49,29 @@ async function addToCart(params) {
 }
 
 // Sepeti getirme
-async function getBasket(params){
+export const getBasket=async(params)=> {
     const client = redisClient;
-    
+
     const cartKey = getCartKey(params.userId);
 
-    try{
+    try {
 
         const value = await client.get(cartKey)
         if (!value) return [];
         return JSON.parse(value)
-    }catch(e){
+    } catch (e) {
         console.log(e);
     }
 }
 
 // Sepeti silme
-async function removeCart(params) {
-    const { userId } = params; 
-    const cartKey = getCartKey(userId);  
+export const removeCart=async(params)=>  {
+    const { userId } = params;
+    const cartKey = getCartKey(userId);
     try {
         const client = redisClient;
         const result = await client.del(cartKey);
-        return result === 0 
+        return result === 0
             ? { success: false, message: "Ürün bulunamadı" }
             : { success: true, message: "Ürün başarıyla silindi" };
     } catch (e) {
@@ -81,7 +81,7 @@ async function removeCart(params) {
 }
 
 // Sepetteki ürünü güncelleme
-const updateCartItem = async (params,res) => {
+export const updateCartItem = async (params, res) => {
     const { userId, productId, action } = params;
 
     const cartKey = getCartKey(userId);
@@ -142,5 +142,3 @@ const updateCartItem = async (params,res) => {
 
 
 
-
-export {addToCart,getBasket,removeCart,updateCartItem}

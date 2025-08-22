@@ -14,7 +14,6 @@ import orderRoute from "./routes/orderRoute.js";
 import basketRoute from "./routes/basketRoute.js";
 import logger from "./utils/logger.js";
 
-// .env dosyasını okuma
 dotenv.config();
 
 // uploads static serving (multer)
